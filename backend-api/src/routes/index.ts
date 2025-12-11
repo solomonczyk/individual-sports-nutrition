@@ -1,6 +1,8 @@
 import { Router } from 'express'
 import authRouter from './auth'
 import healthProfileRouter from './health-profile'
+import nutritionRouter from './nutrition'
+import nutritionPlanRouter from './nutrition-plan'
 
 const router = Router()
 
@@ -14,6 +16,8 @@ router.get('/health', (_req, res) => {
 
 router.use('/auth', authRouter)
 router.use('/health-profile', healthProfileRouter)
+router.use('/nutrition', nutritionRouter)
+router.use('/nutrition-plan', nutritionPlanRouter)
 
 export default router
 
