@@ -105,7 +105,7 @@ export class MealPlanGenerator {
     const breakfastMeal = await this.selectMeal(
       'breakfast',
       distribution.breakfast,
-      input.preferences
+      preferences
     )
     if (breakfastMeal) {
       const servings = this.calculateServings(breakfastMeal.total_macros, distribution.breakfast)
@@ -119,7 +119,7 @@ export class MealPlanGenerator {
       )
     }
 
-    // Обед (главный прием пищи в Сербии)
+    // Обед (главный прием пищи в Сербии) 
     const lunchMeal = await this.selectMeal('lunch', distribution.lunch, preferences)
     if (lunchMeal) {
       const servings = this.calculateServings(lunchMeal.total_macros, distribution.lunch)
