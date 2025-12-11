@@ -28,7 +28,9 @@ export class AuthService {
   async register(input: CreateUserInput): Promise<AuthResponse> {
     const existingUser = await this.userRepository.findByEmail(input.email)
     if (existingUser) {
-      throw new Error('User with this email already exists')
+      const error: Error & { code?: string } = new Error('User with this email already exists')
+      error.code = 'USER_EXISTS'
+      throw error
     }
 
     const password_hash = await bcrypt.hash(input.password, 10)
@@ -53,12 +55,16 @@ export class AuthService {
   async login(input: LoginInput): Promise<AuthResponse> {
     const user = await this.userRepository.findByEmail(input.email)
     if (!user) {
-      throw new Error('Invalid email or password')
+      const error: Error & { code?: string } = new Error('Invalid email or password')
+      error.code = 'INVALID_CREDENTIALS'
+      throw error
     }
 
     const isValidPassword = await bcrypt.compare(input.password, user.password_hash)
     if (!isValidPassword) {
-      throw new Error('Invalid email or password')
+      const error: Error & { code?: string } = new Error('Invalid email or password')
+      error.code = 'INVALID_CREDENTIALS'
+      throw error
     }
 
     const token = this.generateToken(user)
