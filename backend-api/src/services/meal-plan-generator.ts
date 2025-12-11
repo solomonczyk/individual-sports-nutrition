@@ -7,13 +7,6 @@ import { SerbianCuisineService } from './serbian-cuisine-service'
 import { MacroNutrients } from '../models/ingredient'
 import { GenerateMealPlanInput, DailyMealPlanFull } from '../models/meal'
 
-interface MealDistribution {
-  breakfast: { calories: number; protein: number; carbs: number; fats: number }
-  lunch: { calories: number; protein: number; carbs: number; fats: number }
-  dinner: { calories: number; protein: number; carbs: number; fats: number }
-  snacks: Array<{ calories: number; protein: number; carbs: number; fats: number }>
-}
-
 export class MealPlanGenerator {
   private healthProfileService: HealthProfileService
   private nutritionPlanService: NutritionPlanService
