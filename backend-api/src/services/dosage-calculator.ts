@@ -1,7 +1,7 @@
 import { HealthProfile } from '../models/health-profile'
-import { NutritionalNeeds, CalculationResult } from './nutrition-calculator'
-import { Product, ProductPackage } from '../models/product'
-import { Store } from '../models/store'
+import { CalculationResult } from './nutrition-calculator'
+import { Product } from '../models/product'
+import { ProductPackage } from '../models/store'
 
 export interface DosageCalculation {
   product_id: string
@@ -33,7 +33,7 @@ export class DosageCalculator {
     product: Product,
     nutritionalNeeds: CalculationResult,
     profile: HealthProfile,
-    durationDays: number = 30
+    _durationDays: number = 30
   ): DosageCalculation {
     const dailyGrams = this.calculateDailyAmount(product, nutritionalNeeds, profile)
     const dailyServings = this.calculateDailyServings(product, dailyGrams)
@@ -117,7 +117,7 @@ export class DosageCalculator {
 
       default:
         // Для других типов используем стандартную порцию
-        dailyGrams = product.macros.serving_size ? parseFloat(product.macros.serving_size.toString()) || 30 : 30
+        dailyGrams = product.serving_size ? parseFloat(product.serving_size.toString().replace(/[^0-9.]/g, '')) || 30 : 30
     }
 
     // Корректировка по весу для некоторых продуктов

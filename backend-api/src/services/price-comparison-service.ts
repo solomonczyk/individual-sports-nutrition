@@ -112,8 +112,8 @@ export class PriceComparisonService {
       
       if (packages.length === 0) {
         // Если нет упаковок, ищем цену на базовый продукт
-        const price = await this.priceRepository.findByProductAndStore(product.id, storeId)
-        if (!price || !price.in_stock) {
+        const productPrice = await this.priceRepository.findByProductAndStore(product.id, storeId)
+        if (!productPrice || !productPrice.in_stock) {
           // Продукт недоступен в этом магазине
           return null
         }
@@ -123,19 +123,19 @@ export class PriceComparisonService {
         const totalGramsNeeded = req.daily_grams * req.duration_days
         const packageQuantity = Math.ceil(totalGramsNeeded / packageWeight)
 
-        const unitPrice = price.discount_price || price.price
+        const unitPrice = productPrice.discount_price || productPrice.price
         const totalPrice = unitPrice * packageQuantity
 
-        items.push({
-          product_id: product.id,
-          product_name: product.name_key,
-          package_id: null,
-          package_weight: packageWeight,
-          package_quantity: packageQuantity,
-          unit_price: unitPrice,
-          total_price: totalPrice,
-          discount_price: price.discount_price,
-        })
+          items.push({
+            product_id: product.id,
+            product_name: product.name_key,
+            package_id: null,
+            package_weight: packageWeight,
+            package_quantity: packageQuantity,
+            unit_price: unitPrice,
+            total_price: totalPrice,
+            discount_price: productPrice.discount_price,
+          })
 
         subtotal += totalPrice
       } else {

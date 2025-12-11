@@ -55,7 +55,7 @@ export class DosageController {
       }
 
       // Получаем рекомендованные продукты или используем указанные
-      let products
+      let products: Product[]
       if (productIds) {
         // TODO: получать продукты по ID
         products = []
@@ -81,7 +81,7 @@ export class DosageController {
         this.dosageCalculator.calculateDosage(product, nutritionalNeeds, profile, durationDays)
       )
 
-      res.json({
+      return res.json({
         success: true,
         data: {
           dosages,

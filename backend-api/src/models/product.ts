@@ -30,3 +30,6 @@ export interface ProductWithTranslation extends Product {
   brand?: Brand
 }
 
+// Экспортируем ProductPackage из store.ts для удобства
+export type { ProductPackage } from './store'
+
