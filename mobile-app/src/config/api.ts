@@ -11,6 +11,7 @@ export const API_ENDPOINTS = {
     login: '/auth/login',
   },
   healthProfile: '/health-profile',
+  healthProfileUpdate: '/health-profile',
   nutrition: {
     calculate: '/nutrition/calculate',
   },
