@@ -84,11 +84,10 @@ export class AuthService {
   }
 
   private generateToken(user: User): string {
-    return jwt.sign(
-      { userId: user.id, email: user.email },
-      config.JWT_SECRET,
-      { expiresIn: config.JWT_EXPIRES_IN }
-    )
+    const payload = { userId: user.id, email: user.email }
+    return jwt.sign(payload, config.JWT_SECRET, {
+      expiresIn: config.JWT_EXPIRES_IN,
+    } as jwt.SignOptions)
   }
 }
 
