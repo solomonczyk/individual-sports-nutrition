@@ -125,5 +125,26 @@
 
 **Важно**: Порт 3000 занят другим проектом, поэтому backend работает на порту 3001.
 
+**Выполнено** (продолжение):
+- ✅ Создана структура базы данных:
+  - ER-диаграмма (database/schemas/er-diagram.md)
+  - SQL миграция (001_initial_schema.sql) - 12 таблиц + enum типы + индексы + триггеры
+  - Миграция успешно применена на сервере
+- ✅ Созданы TypeScript модели для всех сущностей:
+  - User, HealthProfile, NutritionPlan, Product, UserProgress, Translation
+  - Входные типы (Create, Update)
+- ✅ Реализован API аутентификации:
+  - POST /api/v1/auth/register - регистрация пользователя
+  - POST /api/v1/auth/login - вход с JWT токеном
+  - Middleware authMiddleware для защиты роутов
+  - Хеширование паролей (bcrypt)
+  - Валидация через Zod
+- ✅ Реализован API профиля здоровья:
+  - GET /api/v1/health-profile - получение профиля
+  - POST /api/v1/health-profile - создание профиля
+  - PUT /api/v1/health-profile - обновление профиля
+  - Защищено middleware аутентификации
+  - Валидация данных
+
 ---
 
