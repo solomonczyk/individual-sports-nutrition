@@ -83,13 +83,14 @@ export class DosageController {
           this.dosageCalculator.calculateDosage(product, nutritionalNeeds, profile, durationDays)
         )
 
-      return res.json({
+      res.json({
         success: true,
         data: {
           dosages,
           duration_days: durationDays,
         },
       })
+      return
     } catch (error) {
       next(error)
     }
