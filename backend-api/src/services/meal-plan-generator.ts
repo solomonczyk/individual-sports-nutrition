@@ -3,7 +3,7 @@ import { NutritionPlanService } from './nutrition-plan-service'
 import { MealRepository } from '../repositories/meal-repository'
 import { DailyMealPlanRepository } from '../repositories/daily-meal-plan-repository'
 import { RecommendationService } from './recommendation-service'
-import { MacroNutrients, MicroNutrients } from '../models/ingredient'
+import { MacroNutrients } from '../models/ingredient'
 import { GenerateMealPlanInput, DailyMealPlanFull } from '../models/meal'
 
 interface MealDistribution {

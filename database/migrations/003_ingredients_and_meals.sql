@@ -159,27 +159,43 @@ DECLARE
     total_micronutrients JSONB;
 BEGIN
     -- Calculate totals from meal_ingredients
+    WITH ingredient_macros AS (
+        SELECT 
+            mi.quantity_grams / 100.0 as multiplier,
+            i.macros,
+            i.micronutrients
+        FROM meal_ingredients mi
+        INNER JOIN ingredients i ON mi.ingredient_id = i.id
+        WHERE mi.meal_id = meal_uuid
+    )
     SELECT 
         jsonb_build_object(
-            'protein', COALESCE(SUM((i.macros->>'protein')::numeric * (mi.quantity_grams / 100.0)), 0),
-            'carbs', COALESCE(SUM((i.macros->>'carbs')::numeric * (mi.quantity_grams / 100.0)), 0),
-            'fats', COALESCE(SUM((i.macros->>'fats')::numeric * (mi.quantity_grams / 100.0)), 0),
-            'calories', COALESCE(SUM((i.macros->>'calories')::numeric * (mi.quantity_grams / 100.0)), 0),
-            'fiber', COALESCE(SUM((i.macros->>'fiber')::numeric * (mi.quantity_grams / 100.0)), 0)
-        ),
-        jsonb_object_agg(
-            key, 
-            COALESCE(SUM((value::numeric) * (mi.quantity_grams / 100.0)), 0)
+            'protein', COALESCE(SUM((macros->>'protein')::numeric * multiplier), 0),
+            'carbs', COALESCE(SUM((macros->>'carbs')::numeric * multiplier), 0),
+            'fats', COALESCE(SUM((macros->>'fats')::numeric * multiplier), 0),
+            'calories', COALESCE(SUM((macros->>'calories')::numeric * multiplier), 0),
+            'fiber', COALESCE(SUM((macros->>'fiber')::numeric * multiplier), 0)
         )
-    INTO total_macros, total_micronutrients
-    FROM meal_ingredients mi
-    INNER JOIN ingredients i ON mi.ingredient_id = i.id
-    WHERE mi.meal_id = meal_uuid
-    CROSS JOIN LATERAL jsonb_each(i.micronutrients);
+    INTO total_macros
+    FROM ingredient_macros;
+    
+    -- Calculate micronutrients (simplified - aggregate all micronutrients)
+    SELECT COALESCE(jsonb_object_agg(key, value), '{}'::jsonb)
+    INTO total_micronutrients
+    FROM (
+        SELECT 
+            key,
+            SUM((value::numeric) * (mi.quantity_grams / 100.0)) as value
+        FROM meal_ingredients mi
+        INNER JOIN ingredients i ON mi.ingredient_id = i.id
+        CROSS JOIN LATERAL jsonb_each_text(i.micronutrients)
+        WHERE mi.meal_id = meal_uuid
+        GROUP BY key
+    ) micronutrients;
     
     -- Update meal with calculated values
     UPDATE meals 
-    SET total_macros = total_macros,
+    SET total_macros = COALESCE(total_macros, '{}'::jsonb),
         total_micronutrients = COALESCE(total_micronutrients, '{}'::jsonb),
         updated_at = CURRENT_TIMESTAMP
     WHERE id = meal_uuid;

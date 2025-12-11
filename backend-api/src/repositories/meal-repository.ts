@@ -1,5 +1,5 @@
 import { Pool } from 'pg'
-import { Meal, MealWithIngredients, CreateMealInput, MealIngredient } from '../models/meal'
+import { Meal, MealWithIngredients, CreateMealInput } from '../models/meal'
 import { pool } from '../config/database'
 
 export class MealRepository {
