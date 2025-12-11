@@ -23,7 +23,7 @@ class Settings(BaseSettings):
     backend_api_url: str = "http://localhost:3000"
     
     # CORS
-    cors_origins: list[str] = ["http://localhost:3000", "http://localhost:3001"]
+    cors_origins: str = "http://localhost:3000,http://localhost:3001"
     
     class Config:
         env_file = ".env"
