@@ -98,6 +98,14 @@
   - Инструкции по установке Node.js, Python, PostgreSQL, Redis, Nginx
   - Настройка systemd сервисов
   - Инструкции по обновлению приложения
+- ✅ Созданы скрипты для автоматизации деплоя:
+  - `scripts/setup-remote-repo.sh` / `.ps1` - настройка удаленного репозитория (GitHub/GitLab/Bitbucket)
+  - `scripts/deploy-to-server.sh` - автоматический деплой на сервер
+  - `docs/deployment/quick-start.md` - пошаговое руководство по деплою
+- ✅ Настроен удаленный Git репозиторий:
+  - URL: `git@github.com:solomonczyk/individual-sports-nutrition.git`
+  - Код успешно отправлен в репозиторий
+  - Ветка `main` настроена для отслеживания `origin/main`
 
 ---
 
