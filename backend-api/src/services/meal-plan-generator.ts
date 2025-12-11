@@ -65,6 +65,14 @@ export class MealPlanGenerator {
       snacks: [serbianDistribution.snack1, serbianDistribution.snack2],
     }
 
+    // Приоритет сербской кухни при подборе блюд
+    const preferences = input.preferences || {}
+    if (!preferences.cuisine_types) {
+      preferences.cuisine_types = ['serbian', 'balkan']
+    } else if (!preferences.cuisine_types.includes('serbian')) {
+      preferences.cuisine_types.unshift('serbian') // Добавляем сербскую в начало
+    }
+
     const date = new Date(input.date)
 
     // Проверяем, существует ли уже план на эту дату
@@ -205,8 +213,10 @@ export class MealPlanGenerator {
 
   /**
    * Распределяет калории и БЖУ по приемам пищи
+   * @deprecated Используется сербское распределение через serbianCuisineService
    */
-  private calculateMealDistribution(
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  private calculateMealDistribution_DEPRECATED(
     needs: MacroNutrients,
     goal: string
   ): MealDistribution {
