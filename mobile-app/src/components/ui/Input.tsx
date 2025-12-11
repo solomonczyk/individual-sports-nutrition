@@ -1,26 +1,17 @@
-import { TextInput, Text, View } from 'react-native'
+import { TextInput, Text, View, TextInputProps } from 'react-native'
 import { cn } from '../utils/cn'
 
-interface InputProps {
+interface InputProps extends Omit<TextInputProps, 'className'> {
   label?: string
-  value: string
-  onChangeText: (text: string) => void
-  placeholder?: string
-  secureTextEntry?: boolean
-  keyboardType?: 'default' | 'email-address' | 'numeric' | 'phone-pad'
   error?: string
   className?: string
 }
 
 export function Input({
   label,
-  value,
-  onChangeText,
-  placeholder,
-  secureTextEntry = false,
-  keyboardType = 'default',
   error,
   className,
+  ...props
 }: InputProps) {
   return (
     <View className="mb-4">
@@ -28,11 +19,7 @@ export function Input({
         <Text className="text-sm font-medium text-gray-700 mb-2">{label}</Text>
       )}
       <TextInput
-        value={value}
-        onChangeText={onChangeText}
-        placeholder={placeholder}
-        secureTextEntry={secureTextEntry}
-        keyboardType={keyboardType}
+        {...props}
         className={cn(
           'border border-gray-300 rounded-lg px-4 py-3 text-base',
           error && 'border-red-500',
