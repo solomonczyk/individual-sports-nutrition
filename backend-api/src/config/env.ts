@@ -41,7 +41,7 @@ export const config: EnvConfig = {
   DB_PASSWORD: getEnvVar('DB_PASSWORD', ''),
   REDIS_HOST: getEnvVar('REDIS_HOST', 'localhost'),
   REDIS_PORT: getEnvVar('REDIS_PORT', '6379'),
-  REDIS_PASSWORD: getEnvVar('REDIS_PASSWORD', ''),
+  REDIS_PASSWORD: process.env.REDIS_PASSWORD || '',
   JWT_SECRET: getEnvVar('JWT_SECRET', 'dev-secret-change-in-production'),
   JWT_EXPIRES_IN: getEnvVar('JWT_EXPIRES_IN', '7d'),
   AI_SERVICE_URL: getEnvVar('AI_SERVICE_URL', 'http://localhost:8000'),
