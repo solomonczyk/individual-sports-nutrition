@@ -1,18 +1,17 @@
-import { View, Text, StyleSheet } from 'react-native'
-import { StatusBar } from 'expo-status-bar'
+import { Redirect } from 'expo-router'
+import { useAuthStore } from '../src/store/auth-store'
 
 export default function Index() {
-  return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Individual Sports Nutrition</Text>
-      <Text style={styles.subtitle}>Персонализированное спортивное питание</Text>
-      <StatusBar style="auto" />
-    </View>
-  )
-}
+  const { isAuthenticated } = useAuthStore()
 
-const styles = StyleSheet.create({
-  container: {
+  // Если пользователь не авторизован - показываем онбординг
+  if (!isAuthenticated) {
+    return <Redirect href="/(onboarding)/welcome" />
+  }
+
+  // Если авторизован - переходим на главный экран
+  return <Redirect href="/(tabs)/home" />
+} {
     flex: 1,
     backgroundColor: '#fff',
     alignItems: 'center',
