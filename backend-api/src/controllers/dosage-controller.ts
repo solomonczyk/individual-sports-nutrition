@@ -78,9 +78,9 @@ export class DosageController {
       }
 
       const dosages = products
-        .filter((p): p is Product => 'id' in p && 'type' in p && 'macros' in p)
-        .map((product) =>
-          this.dosageCalculator.calculateDosage(product as Product, nutritionalNeeds, profile, durationDays)
+        .filter((p) => 'id' in p && 'type' in p && 'macros' in p)
+        .map((product: any) =>
+          this.dosageCalculator.calculateDosage(product, nutritionalNeeds, profile, durationDays)
         )
 
       return res.json({

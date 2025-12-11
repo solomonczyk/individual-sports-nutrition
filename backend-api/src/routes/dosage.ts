@@ -12,7 +12,7 @@ router.get('/shopping-options', authMiddleware, (req, res, next) =>
 )
 
 // Price comparison routes
-router.get('/products/:productId/prices', (req, res, next) => priceController.compareProduct(req, res, next))
+router.get('/products/:productId/prices', (req: any, res, next) => priceController.compareProduct(req, res, next))
 
 export default router
 
