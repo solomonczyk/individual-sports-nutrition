@@ -141,11 +141,6 @@ export class PriceComparisonService {
         } else {
           // Есть упаковки - находим лучшую комбинацию
           const bestPackage = this.findBestPackage(packages, req.daily_grams * req.duration_days)
-          
-          const productPrice = await this.priceRepository.findByProductAndStore(
-            product.id,
-            storeId
-          )
         
         // Ищем цену на эту упаковку
         const packagePrice = await this.priceRepository.findByProductPackage(

@@ -77,9 +77,11 @@ export class DosageController {
         method: 'calculated',
       }
 
-      const dosages = products.map((product) =>
-        this.dosageCalculator.calculateDosage(product, nutritionalNeeds, profile, durationDays)
-      )
+      const dosages = products
+        .filter((p): p is Product => 'id' in p && 'type' in p && 'macros' in p)
+        .map((product) =>
+          this.dosageCalculator.calculateDosage(product as Product, nutritionalNeeds, profile, durationDays)
+        )
 
       return res.json({
         success: true,
@@ -128,13 +130,14 @@ export class DosageController {
       const products = recommendations.map((rec) => rec.product)
 
       if (products.length === 0) {
-        return res.json({
+        res.json({
           success: true,
           data: {
             options: [],
             message: 'No products found for recommendations',
           },
         })
+        return
       }
 
       // Рассчитываем требования
@@ -193,8 +196,14 @@ export class PriceComparisonController {
    */
   async compareProduct(req: Request, res: Response, next: NextFunction) {
     try {
-      const { productId } = req.params
-      const packageId = req.query.package_id as string | undefined
+      const productId = (req as any).params?.productId as string
+      const packageId = (req as any).query?.package_id as string | undefined
+      
+      if (!productId) {
+        const error: ApiError = new Error('Product ID is required')
+        error.statusCode = 400
+        return next(error)
+      }
 
       const comparisons = await this.priceComparisonService.compareProductPrices(
         productId,
