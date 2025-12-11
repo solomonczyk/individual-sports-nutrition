@@ -110,21 +110,21 @@ export class PriceComparisonService {
       // Получаем упаковки продукта
       const packages = await this.packageRepository.findByProductId(product.id)
       
-      if (packages.length === 0) {
-        // Если нет упаковок, ищем цену на базовый продукт
-        const productPrice = await this.priceRepository.findByProductAndStore(product.id, storeId)
-        if (!productPrice || !productPrice.in_stock) {
-          // Продукт недоступен в этом магазине
-          return null
-        }
+        if (packages.length === 0) {
+          // Если нет упаковок, ищем цену на базовый продукт
+          const productPrice = await this.priceRepository.findByProductAndStore(product.id, storeId)
+          if (!productPrice || !productPrice.in_stock) {
+            // Продукт недоступен в этом магазине
+            return null
+          }
 
-        // Рассчитываем количество (используем вес продукта или стандартную порцию)
-        const packageWeight = 1000 // предполагаем 1кг по умолчанию
-        const totalGramsNeeded = req.daily_grams * req.duration_days
-        const packageQuantity = Math.ceil(totalGramsNeeded / packageWeight)
+          // Рассчитываем количество (используем вес продукта или стандартную порцию)
+          const packageWeight = 1000 // предполагаем 1кг по умолчанию
+          const totalGramsNeeded = req.daily_grams * req.duration_days
+          const packageQuantity = Math.ceil(totalGramsNeeded / packageWeight)
 
-        const unitPrice = productPrice.discount_price || productPrice.price
-        const totalPrice = unitPrice * packageQuantity
+          const unitPrice = productPrice.discount_price || productPrice.price
+          const totalPrice = unitPrice * packageQuantity
 
           items.push({
             product_id: product.id,
@@ -137,15 +137,15 @@ export class PriceComparisonService {
             discount_price: productPrice.discount_price,
           })
 
-        subtotal += totalPrice
-      } else {
-        // Есть упаковки - находим лучшую комбинацию
-        const bestPackage = this.findBestPackage(packages, req.daily_grams * req.duration_days)
-        
-        const price = await this.priceRepository.findByProductAndStore(
-          product.id,
-          storeId
-        )
+          subtotal += totalPrice
+        } else {
+          // Есть упаковки - находим лучшую комбинацию
+          const bestPackage = this.findBestPackage(packages, req.daily_grams * req.duration_days)
+          
+          const productPrice = await this.priceRepository.findByProductAndStore(
+            product.id,
+            storeId
+          )
         
         // Ищем цену на эту упаковку
         const packagePrice = await this.priceRepository.findByProductPackage(

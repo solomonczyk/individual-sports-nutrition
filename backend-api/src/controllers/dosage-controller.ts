@@ -55,7 +55,7 @@ export class DosageController {
       }
 
       // Получаем рекомендованные продукты или используем указанные
-      let products: Product[]
+      let products: Array<{ id: string; name_key: string; type: string; macros: any; serving_size: string | null }>
       if (productIds) {
         // TODO: получать продукты по ID
         products = []
