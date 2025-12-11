@@ -79,5 +79,25 @@
 
 **Время выполнения**: ~35 минут (предыдущее) + ~25 минут (ai-service) = ~60 минут
 
+**Выполнено** (продолжение):
+- ✅ Переименование проекта на "Individual Sports Nutrition":
+  - Обновлены все упоминания в файлах проекта (DEVELOPMENT_LOG.md, package.json, README, config файлы)
+  - Изменены названия пакетов и сервисов:
+    - `own-sport-food-api` → `individual-sports-nutrition-api`
+    - `own-sport-food-ai-service` → `individual-sports-nutrition-ai-service`
+    - `own-sport-food-mobile` → `individual-sports-nutrition-mobile`
+  - Обновлены базы данных: `own_sport_food` → `individual_sports_nutrition`
+  - Обновлены bundle identifiers и схемы в mobile-app
+- ✅ Создан Git репозиторий:
+  - Инициализирован репозиторий
+  - Создан .gitignore
+  - Создан главный README.md проекта
+  - Выполнен первый коммит
+- ✅ Подготовлена документация для деплоя:
+  - Создана инструкция по настройке сервера (docs/deployment/server-setup.md)
+  - Инструкции по установке Node.js, Python, PostgreSQL, Redis, Nginx
+  - Настройка systemd сервисов
+  - Инструкции по обновлению приложения
+
 ---
 
