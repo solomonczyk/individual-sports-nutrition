@@ -3,6 +3,8 @@ import authRouter from './auth'
 import healthProfileRouter from './health-profile'
 import nutritionRouter from './nutrition'
 import nutritionPlanRouter from './nutrition-plan'
+import productsRouter from './products'
+import recommendationsRouter from './recommendations'
 
 const router = Router()
 
@@ -18,6 +20,8 @@ router.use('/auth', authRouter)
 router.use('/health-profile', healthProfileRouter)
 router.use('/nutrition', nutritionRouter)
 router.use('/nutrition-plan', nutritionPlanRouter)
+router.use('/products', productsRouter)
+router.use('/recommendations', recommendationsRouter)
 
 export default router
 
