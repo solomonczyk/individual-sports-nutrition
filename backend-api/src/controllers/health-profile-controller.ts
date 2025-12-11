@@ -33,13 +33,7 @@ export class HealthProfileController {
       }
 
       const profile = await this.service.getByUserId(req.user.id)
-      if (!profile) {
-        return res.json({
-          success: true,
-          data: null,
-        })
-      }
-
+      
       res.json({
         success: true,
         data: profile,
