@@ -3,6 +3,7 @@ import { NutritionPlanService } from './nutrition-plan-service'
 import { MealRepository } from '../repositories/meal-repository'
 import { DailyMealPlanRepository } from '../repositories/daily-meal-plan-repository'
 import { RecommendationService } from './recommendation-service'
+import { SerbianCuisineService } from './serbian-cuisine-service'
 import { MacroNutrients } from '../models/ingredient'
 import { GenerateMealPlanInput, DailyMealPlanFull } from '../models/meal'
 
@@ -19,6 +20,7 @@ export class MealPlanGenerator {
   private mealRepository: MealRepository
   private dailyMealPlanRepository: DailyMealPlanRepository
   private recommendationService: RecommendationService
+  private serbianCuisineService: SerbianCuisineService
 
   constructor() {
     this.healthProfileService = new HealthProfileService()
@@ -26,6 +28,7 @@ export class MealPlanGenerator {
     this.mealRepository = new MealRepository()
     this.dailyMealPlanRepository = new DailyMealPlanRepository()
     this.recommendationService = new RecommendationService()
+    this.serbianCuisineService = new SerbianCuisineService()
   }
 
   /**
@@ -47,15 +50,20 @@ export class MealPlanGenerator {
     }
 
     // Распределяем калории и БЖУ по приемам пищи
-    const distribution = this.calculateMealDistribution(
-      {
-        calories: nutritionPlan.calories,
-        protein: nutritionPlan.protein || 0,
-        carbs: nutritionPlan.carbs || 0,
-        fats: nutritionPlan.fats || 0,
-      },
-      profile.goal || 'maintain'
+    // Используем сербское распределение (главный прием пищи в обед)
+    const serbianDistribution = this.serbianCuisineService.adjustMealDistributionForSerbian(
+      nutritionPlan.calories || 0,
+      nutritionPlan.protein || 0,
+      nutritionPlan.carbs || 0,
+      nutritionPlan.fats || 0
     )
+
+    const distribution = {
+      breakfast: serbianDistribution.breakfast,
+      lunch: serbianDistribution.lunch,
+      dinner: serbianDistribution.dinner,
+      snacks: [serbianDistribution.snack1, serbianDistribution.snack2],
+    }
 
     const date = new Date(input.date)
 
@@ -82,11 +90,13 @@ export class MealPlanGenerator {
     }
 
     // Подбираем блюда для каждого приема пищи
+    // Используем стандартное сербское расписание, если не указано иное
+    const defaultSerbianTimes = this.serbianCuisineService.getDefaultMealTimes()
     const mealTimes = input.preferences?.meal_times || {
-      breakfast: '08:00',
-      lunch: '13:00',
-      dinner: '19:00',
-      snacks: ['10:30', '16:00'],
+      breakfast: defaultSerbianTimes.breakfast,
+      lunch: defaultSerbianTimes.lunch,
+      dinner: defaultSerbianTimes.dinner,
+      snacks: [defaultSerbianTimes.snack1, defaultSerbianTimes.snack2],
     }
 
     let orderIndex = 1
@@ -109,8 +119,8 @@ export class MealPlanGenerator {
       )
     }
 
-    // Обед
-    const lunchMeal = await this.selectMeal('lunch', distribution.lunch, input.preferences)
+    // Обед (главный прием пищи в Сербии)
+    const lunchMeal = await this.selectMeal('lunch', distribution.lunch, preferences)
     if (lunchMeal) {
       const servings = this.calculateServings(lunchMeal.total_macros, distribution.lunch)
       await this.dailyMealPlanRepository.addMeal(
@@ -124,7 +134,7 @@ export class MealPlanGenerator {
     }
 
     // Ужин
-    const dinnerMeal = await this.selectMeal('dinner', distribution.dinner, input.preferences)
+    const dinnerMeal = await this.selectMeal('dinner', distribution.dinner, preferences)
     if (dinnerMeal) {
       const servings = this.calculateServings(dinnerMeal.total_macros, distribution.dinner)
       await this.dailyMealPlanRepository.addMeal(
@@ -139,7 +149,7 @@ export class MealPlanGenerator {
 
     // Перекусы
     for (let i = 0; i < distribution.snacks.length && i < (mealTimes.snacks?.length || 0); i++) {
-      const snackMeal = await this.selectMeal('snack', distribution.snacks[i], input.preferences)
+      const snackMeal = await this.selectMeal('snack', distribution.snacks[i], preferences)
       if (snackMeal) {
         const servings = this.calculateServings(snackMeal.total_macros, distribution.snacks[i])
         await this.dailyMealPlanRepository.addMeal(
