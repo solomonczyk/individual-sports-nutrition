@@ -1,12 +1,10 @@
-import { Redirect, useRouter } from 'expo-router'
-import { useEffect } from 'react'
+import { Redirect } from 'expo-router'
 import { useAuthStore } from '../src/store/auth-store'
 import { useQuery } from '@tanstack/react-query'
 import { healthProfileService } from '../src/services/health-profile-service'
 
 export default function Index() {
   const { isAuthenticated } = useAuthStore()
-  const router = useRouter()
 
   const { data: healthProfile, isLoading } = useQuery({
     queryKey: ['healthProfile'],
@@ -31,22 +29,4 @@ export default function Index() {
 
   // Если есть профиль - переходим на главный экран
   return <Redirect href="/(tabs)/home" />
-} {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 20,
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    marginBottom: 10,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#666',
-    textAlign: 'center',
-  },
-})
-
+}
