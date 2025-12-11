@@ -5,6 +5,7 @@ import nutritionRouter from './nutrition'
 import nutritionPlanRouter from './nutrition-plan'
 import productsRouter from './products'
 import recommendationsRouter from './recommendations'
+import dosageRouter from './dosage'
 
 const router = Router()
 
@@ -22,6 +23,7 @@ router.use('/nutrition', nutritionRouter)
 router.use('/nutrition-plan', nutritionPlanRouter)
 router.use('/products', productsRouter)
 router.use('/recommendations', recommendationsRouter)
+router.use('/dosage', dosageRouter)
 
 export default router
 
