@@ -5,6 +5,8 @@ Uses ML models to generate personalized meal plans
 from typing import List, Dict
 from datetime import datetime, date
 from app.models.meal_plan import MealPlanRequest, MealPlanResponse
+from app.ml.meal_planner import MealPlanner
+from app.utils.logger import logger
 import httpx
 
 
@@ -12,6 +14,7 @@ class MealPlanService:
     def __init__(self, backend_api_url: str):
         self.backend_api_url = backend_api_url
         self.client = httpx.AsyncClient(timeout=30.0)
+        self.meal_planner = MealPlanner()
 
     async def generate_ai_meal_plan(
         self, request: MealPlanRequest
@@ -47,8 +50,10 @@ class MealPlanService:
             data = response.json()
             meal_plan_data = data.get("data", {})
             
-            # Enhance with AI (placeholder)
+            # Enhance with AI optimization
             enhanced_plan = self._enhance_meal_plan(meal_plan_data, request)
+            
+            logger.info(f"Generated enhanced meal plan for user {request.user_id}")
             
             return MealPlanResponse(
                 meal_plan_id=enhanced_plan.get("id", ""),
@@ -70,15 +75,41 @@ class MealPlanService:
     ) -> Dict:
         """
         Enhance meal plan with AI optimization
-        
-        Placeholder - will use ML models in future
         """
-        # For now, just return the base plan
-        # In future, this will:
-        # - Optimize meal selection using ML models
-        # - Improve macro distribution
-        # - Suggest better meal timing
-        # - Account for user preferences more intelligently
+        # Calculate optimal meal distribution
+        meal_distribution = self.meal_planner.calculate_meal_distribution(
+            request.target_calories,
+            request.preferences.get("goal", "maintain") if request.preferences else "maintain",
+            request.preferences.get("activity_level", "moderate") if request.preferences else "moderate",
+        )
+        
+        # Get optimal meal times
+        meal_times = self.meal_planner.get_optimal_meal_times(
+            request.preferences.get("goal", "maintain") if request.preferences else "maintain",
+            request.preferences.get("activity_level", "moderate") if request.preferences else "moderate",
+        )
+        
+        # Optimize meals if available
+        if "meals" in base_plan and base_plan["meals"]:
+            # Prioritize Serbian cuisine if preference exists
+            if request.cuisine_types and "serbian" in [c.lower() for c in request.cuisine_types]:
+                base_plan["meals"] = self.meal_planner.prioritize_serbian_cuisine(
+                    base_plan["meals"],
+                    request.preferences,
+                )
+            
+            # Optimize meal timing
+            for meal_item in base_plan.get("meals", []):
+                meal_type = meal_item.get("meal_type", "")
+                if meal_type in meal_times:
+                    meal_item["scheduled_time"] = meal_times[meal_type]
+        
+        # Add optimization metadata
+        base_plan["optimization"] = {
+            "meal_distribution": meal_distribution,
+            "algorithm_version": "1.0",
+            "enhanced": True,
+        }
         
         return base_plan
 
