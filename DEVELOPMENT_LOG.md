@@ -291,5 +291,62 @@
 - ✅ Экран прогресса (/(tabs)/progress):
   - Placeholder для графиков и статистики
 
+### День 39-44 — Главный экран и рекомендации
+
+**Выполнено**:
+- ✅ Сервисы для главного экрана:
+  - nutrition-service.ts (расчет потребностей)
+  - nutrition-plan-service.ts (получение плана)
+  - recommendations-service.ts (рекомендации продуктов, дозировки)
+  - meal-plan-service.ts (дневной план питания)
+- ✅ Типы данных:
+  - nutrition.ts (NutritionCalculation, NutritionPlan)
+  - recommendation.ts (ProductRecommendation, Dosage)
+  - product.ts (Product, Brand)
+  - meal-plan.ts (DailyMealPlan, Meal, MacroNutrients, MicroNutrients)
+- ✅ UI компоненты:
+  - LoadingSpinner (компонент загрузки)
+  - EmptyState (компонент пустого состояния)
+  - ProductCard (карточка продукта с макронутриентами, дозировкой, ценой)
+  - MealCard (карточка приема пищи с расписанием, макронутриентами)
+  - RecommendationList (список рекомендаций продуктов)
+  - DailyMealPlan (дневной план питания с группировкой по типам приемов пищи)
+- ✅ Главный экран (/(tabs)/home):
+  - Интеграция с API (React Query)
+  - Отображение плана питания (калории, БЖУ)
+  - Отображение рекомендаций продуктов с дозировками
+  - Отображение дневного плана питания
+  - Pull-to-refresh функционал
+  - Обработка состояний (loading, error, empty)
+  - Кнопка генерации плана питания (если нет плана)
+
+### День 45-50 — Трекинг прогресса
+
+**Выполнено**:
+- ✅ Типы данных для прогресса:
+  - progress.ts (UserProgress, ProgressStats, WeightDataPoint, NutritionDataPoint)
+- ✅ Сервис прогресса:
+  - progress-service.ts (CRUD операции, статистика)
+  - Добавлены endpoints в API config
+- ✅ UI компоненты для прогресса:
+  - ProgressChart (bar chart компонент)
+  - LineChart (line chart компонент)
+  - DailyProgressCard (карточка дневного прогресса с процентами выполнения целей)
+  - ProgressHistory (история прогресса с карточками)
+- ✅ Экран прогресса (/(tabs)/progress):
+  - Выбор периода (7/30/90 дней)
+  - Статистика (средние значения калорий, БЖУ, количество дней отслеживания)
+  - Графики:
+    * График калорий (line chart)
+    * График макронутриентов (bar chart)
+  - История прогресса (карточки за каждый день с прогресс-барами)
+  - Pull-to-refresh функционал
+  - Интеграция с API (meal plans)
+
+**Следующий шаг**: 
+- Настройки (полный функционал)
+- Backend API endpoints для прогресса (если нужны дополнительные)
+- Детальные экраны продуктов и блюд
+
 ---
 

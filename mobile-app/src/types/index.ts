@@ -1,10 +1,19 @@
+// Re-export all types from specific files
+export * from './nutrition'
+export * from './recommendation'
+export * from './product'
+export * from './meal-plan'
+export * from './progress'
+
 export interface User {
   id: string
   email: string
   name?: string
   language: string
+  token?: string
 }
 
+// Legacy types (kept for backward compatibility)
 export interface HealthProfile {
   gender: 'male' | 'female'
   age: number
@@ -16,32 +25,3 @@ export interface HealthProfile {
   medications?: string[]
   contraindications?: string[]
 }
-
-export interface NutritionPlan {
-  id: string
-  calories: number
-  protein: number
-  carbs: number
-  fats: number
-  supplements: Supplement[]
-  meals: Meal[]
-}
-
-export interface Supplement {
-  id: string
-  name: string
-  dosage: string
-  frequency: string
-  contraindications?: string[]
-}
-
-export interface Meal {
-  id: string
-  name: string
-  calories: number
-  protein: number
-  carbs: number
-  fats: number
-  time: string
-}
-

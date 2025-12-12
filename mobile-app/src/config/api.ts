@@ -27,5 +27,11 @@ export const API_ENDPOINTS = {
     daily: '/meal-plan/daily',
     weekly: '/meal-plan/weekly',
   },
+  progress: {
+    list: '/progress',
+    create: '/progress',
+    update: '/progress',
+    stats: '/progress/stats',
+  },
 } as const
 
