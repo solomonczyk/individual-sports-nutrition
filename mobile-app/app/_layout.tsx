@@ -35,6 +35,9 @@ export default function RootLayout() {
           <Stack.Screen name="(auth)" options={{ headerShown: false }} />
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen name="health-profile" options={{ headerShown: false }} />
+          <Stack.Screen name="product" options={{ headerShown: false }} />
+          <Stack.Screen name="meal" options={{ headerShown: false }} />
+          <Stack.Screen name="shopping" options={{ headerShown: false }} />
         </Stack>
       </SafeAreaProvider>
     </QueryClientProvider>

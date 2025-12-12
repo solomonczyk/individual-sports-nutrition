@@ -140,8 +140,7 @@ export default function HomeScreen() {
             <DailyMealPlan
               mealPlan={mealPlanData.data}
               onMealPress={(mealId) => {
-                // TODO: Navigate to meal details
-                console.log('Meal pressed:', mealId)
+                router.push(`/meal/${mealId}`)
               }}
             />
           ) : (
@@ -170,12 +169,10 @@ export default function HomeScreen() {
               recommendations={recommendationsData?.data || []}
               dosages={dosagesData?.data.dosages}
               onProductPress={(productId) => {
-                // TODO: Navigate to product details
-                console.log('Product pressed:', productId)
+                router.push(`/product/${productId}`)
               }}
               onBuyPress={(productId) => {
-                // TODO: Navigate to shopping options
-                console.log('Buy pressed:', productId)
+                router.push(`/shopping/${productId}`)
               }}
             />
           )}

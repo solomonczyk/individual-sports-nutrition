@@ -14,6 +14,7 @@ import i18n from '../../src/i18n'
 
 export default function ProgressScreen() {
   const { user } = useAuthStore()
+  const router = useRouter()
   const [refreshing, setRefreshing] = useState(false)
   const [selectedPeriod, setSelectedPeriod] = useState<'7d' | '30d' | '90d'>('30d')
 
@@ -260,8 +261,8 @@ export default function ProgressScreen() {
             targetCarbs={targetCarbs}
             targetFats={targetFats}
             onDayPress={(date) => {
-              // TODO: Navigate to day details
-              console.log('Day pressed:', date)
+              // Navigate to meal plan for that day
+              router.push(`/meal-plan/${date}`)
             }}
           />
         ) : (
