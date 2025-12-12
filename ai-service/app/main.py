@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.config import get_settings
-from app.routers import health_router
+from app.routers.health import router as health_router
 from app.routers import recommendations
 from app.routers import meal_plan as meal_plan_router
 from app.utils.logger import logger

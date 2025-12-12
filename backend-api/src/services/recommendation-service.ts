@@ -1,6 +1,7 @@
 import { HealthProfileService } from './health-profile-service'
 import { ProductService } from './product-service'
 import { ContraindicationRepository } from '../repositories/contraindication-repository'
+import { AIServiceClient } from './ai-service-client'
 import { Product, ProductWithTranslation } from '../models/product'
 import { HealthProfile } from '../models/health-profile'
 
@@ -25,11 +26,13 @@ export class RecommendationService {
   private healthProfileService: HealthProfileService
   private productService: ProductService
   private contraindicationRepository: ContraindicationRepository
+  private aiServiceClient: AIServiceClient
 
   constructor() {
     this.healthProfileService = new HealthProfileService()
     this.productService = new ProductService()
     this.contraindicationRepository = new ContraindicationRepository()
+    this.aiServiceClient = new AIServiceClient()
   }
 
   /**

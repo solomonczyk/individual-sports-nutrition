@@ -401,5 +401,29 @@
   - Экран прогресса: переход к деталям дня (meal plan)
   - Обновлен layout для новых экранов
 
+### День 57-61 — AI-модули (начало)
+
+**Выполнено**:
+- ✅ AI Service - базовая структура:
+  - Модели данных (Pydantic): recommendation.py, meal_plan.py
+  - Services: recommendation_service.py, meal_plan_service.py
+  - Routers: recommendations.py, meal_plan.py
+  - API endpoints:
+    * POST /recommendations/ai - AI-powered рекомендации
+    * POST /meal-plan/generate/ai - AI-генерация планов
+  - Интегрировано в main.py
+- ✅ Интеграция AI сервиса с Backend API:
+  - Добавлен AI_SERVICE_URL в config
+  - Создан AIServiceClient для вызова AI endpoints
+  - Интегрирован в RecommendationService:
+    * Сначала пробует получить AI рекомендации
+    * Fallback на rule-based если AI недоступен
+    * Конвертация AI ответов в формат ProductRecommendation
+
+**Следующий шаг**: 
+- Улучшение AI логики (ML модели, векторные базы)
+- Расширение функционала AI сервиса
+- Тестирование интеграции
+
 ---
 
