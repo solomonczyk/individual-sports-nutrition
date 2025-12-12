@@ -2,6 +2,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.config import get_settings
 from app.routers import health_router
+from app.routers import recommendations
+from app.routers import meal_plan as meal_plan_router
 from app.utils.logger import logger
 
 settings = get_settings()
@@ -21,6 +23,8 @@ app.add_middleware(
 )
 
 app.include_router(health_router)
+app.include_router(recommendations.router)
+app.include_router(meal_plan_router.router)
 
 
 @app.on_event("startup")
