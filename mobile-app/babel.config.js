@@ -3,8 +3,10 @@ module.exports = function(api) {
   return {
     presets: ['babel-preset-expo'],
     plugins: [
-      'expo-router/babel',
-      'nativewind/babel',
+      // expo-router/babel больше не нужен в SDK 50 - уже включен в babel-preset-expo
+      // Временно отключен nativewind/babel для веб-версии
+      // TODO: Восстановить после настройки NativeWind для веб
+      // 'nativewind/babel',
     ],
   }
 }

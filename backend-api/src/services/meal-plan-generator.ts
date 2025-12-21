@@ -66,6 +66,19 @@ export class MealPlanGenerator {
       preferences.cuisine_types.unshift('serbian') // Добавляем сербскую в начало
     }
 
+    // Добавляем аллергии из профиля пользователя в исключенные ингредиенты
+    if (profile.allergies && profile.allergies.length > 0) {
+      if (!preferences.exclude_ingredients) {
+        preferences.exclude_ingredients = []
+      }
+      // Добавляем аллергии, если их еще нет в списке
+      profile.allergies.forEach((allergy) => {
+        if (!preferences.exclude_ingredients!.some((ex) => ex.toLowerCase() === allergy.toLowerCase())) {
+          preferences.exclude_ingredients!.push(allergy)
+        }
+      })
+    }
+
     const date = new Date(input.date)
 
     // Проверяем, существует ли уже план на эту дату
@@ -101,14 +114,17 @@ export class MealPlanGenerator {
     }
 
     let orderIndex = 1
+    const selectedMealIds: string[] = [] // Для отслеживания разнообразия
 
     // Завтрак
     const breakfastMeal = await this.selectMeal(
       'breakfast',
       distribution.breakfast,
-      preferences
+      preferences,
+      selectedMealIds
     )
     if (breakfastMeal) {
+      selectedMealIds.push(breakfastMeal.id)
       const servings = this.calculateServings(breakfastMeal.total_macros, distribution.breakfast)
       await this.dailyMealPlanRepository.addMeal(
         dailyPlan.id,
@@ -121,8 +137,9 @@ export class MealPlanGenerator {
     }
 
     // Обед (главный прием пищи в Сербии) 
-    const lunchMeal = await this.selectMeal('lunch', distribution.lunch, preferences)
+    const lunchMeal = await this.selectMeal('lunch', distribution.lunch, preferences, selectedMealIds)
     if (lunchMeal) {
+      selectedMealIds.push(lunchMeal.id)
       const servings = this.calculateServings(lunchMeal.total_macros, distribution.lunch)
       await this.dailyMealPlanRepository.addMeal(
         dailyPlan.id,
@@ -135,8 +152,9 @@ export class MealPlanGenerator {
     }
 
     // Ужин
-    const dinnerMeal = await this.selectMeal('dinner', distribution.dinner, preferences)
+    const dinnerMeal = await this.selectMeal('dinner', distribution.dinner, preferences, selectedMealIds)
     if (dinnerMeal) {
+      selectedMealIds.push(dinnerMeal.id)
       const servings = this.calculateServings(dinnerMeal.total_macros, distribution.dinner)
       await this.dailyMealPlanRepository.addMeal(
         dailyPlan.id,
@@ -150,8 +168,9 @@ export class MealPlanGenerator {
 
     // Перекусы
     for (let i = 0; i < distribution.snacks.length && i < (mealTimes.snacks?.length || 0); i++) {
-      const snackMeal = await this.selectMeal('snack', distribution.snacks[i], preferences)
+      const snackMeal = await this.selectMeal('snack', distribution.snacks[i], preferences, selectedMealIds)
       if (snackMeal) {
+        selectedMealIds.push(snackMeal.id)
         const servings = this.calculateServings(snackMeal.total_macros, distribution.snacks[i])
         await this.dailyMealPlanRepository.addMeal(
           dailyPlan.id,
@@ -207,48 +226,90 @@ export class MealPlanGenerator {
 
   /**
    * Подбирает блюдо из базы данных по типу и целевым макронутриентам
+   * Улучшенная версия с учетом аллергий, предпочтений и разнообразия
    */
   private async selectMeal(
     mealType: 'breakfast' | 'lunch' | 'dinner' | 'snack',
     targetMacros: { calories: number; protein: number; carbs: number; fats: number },
-    preferences?: GenerateMealPlanInput['preferences']
+    preferences?: GenerateMealPlanInput['preferences'],
+    alreadySelectedMealIds?: string[]
   ) {
     // Получаем блюда нужного типа
-    const meals = await this.mealRepository.findByMealType(mealType, 50)
+    let meals = await this.mealRepository.findByMealType(mealType, 100)
 
     if (meals.length === 0) {
       return null
     }
 
     // Фильтруем по типу кухни, если указано
-    let filteredMeals = meals
     if (preferences?.cuisine_types && preferences.cuisine_types.length > 0) {
-      filteredMeals = meals.filter((m) =>
+      meals = meals.filter((m) =>
         m.cuisine_type && preferences.cuisine_types!.includes(m.cuisine_type)
       )
     }
 
-    if (filteredMeals.length === 0) {
-      filteredMeals = meals
+    // Если после фильтрации ничего не осталось, используем все доступные
+    if (meals.length === 0) {
+      meals = await this.mealRepository.findByMealType(mealType, 100)
+    }
+
+    // Фильтруем по исключенным ингредиентам и аллергиям
+    const excludeIngredients = preferences?.exclude_ingredients || []
+    if (excludeIngredients.length > 0) {
+      meals = meals.filter((meal) => {
+        // Проверяем ингредиенты блюда
+        const ingredients = meal.ingredients || []
+        const hasExcluded = ingredients.some((ing: any) => {
+          const ingName = (ing.name || ing.name_key || '').toLowerCase()
+          return excludeIngredients.some((excluded) =>
+            ingName.includes(excluded.toLowerCase()) || excluded.toLowerCase().includes(ingName)
+          )
+        })
+
+        return !hasExcluded
+      })
+    }
+
+    // Избегаем повторения уже выбранных блюд (для разнообразия)
+    if (alreadySelectedMealIds && alreadySelectedMealIds.length > 0) {
+      const availableMeals = meals.filter((m) => !alreadySelectedMealIds.includes(m.id))
+      if (availableMeals.length > 0) {
+        meals = availableMeals
+      }
     }
 
     // Выбираем блюдо, макронутриенты которого наиболее близки к целевым
-    let bestMeal = filteredMeals[0]
+    let bestMeal = meals[0]
     let bestScore = Infinity
 
-    for (const meal of filteredMeals) {
+    for (const meal of meals) {
       const macros = meal.total_macros
       if (!macros.calories || macros.calories === 0) {
         continue
       }
 
       // Рассчитываем разницу (чем меньше, тем лучше)
-      const calorieDiff = Math.abs(macros.calories - targetMacros.calories) / targetMacros.calories
+      // Используем взвешенную оценку с приоритетом калориям и белкам
+      const calorieDiff = Math.abs(macros.calories - targetMacros.calories) / Math.max(targetMacros.calories, 1)
       const proteinDiff = Math.abs((macros.protein || 0) - targetMacros.protein) / Math.max(targetMacros.protein, 1)
       const carbsDiff = Math.abs((macros.carbs || 0) - targetMacros.carbs) / Math.max(targetMacros.carbs, 1)
       const fatsDiff = Math.abs((macros.fats || 0) - targetMacros.fats) / Math.max(targetMacros.fats, 1)
 
-      const score = calorieDiff * 0.4 + proteinDiff * 0.3 + carbsDiff * 0.2 + fatsDiff * 0.1
+      // Улучшенная формула оценки (калории и белок важнее)
+      const score = calorieDiff * 0.5 + proteinDiff * 0.3 + carbsDiff * 0.15 + fatsDiff * 0.05
+
+      // Бонус за сербскую кухню (если предпочтения позволяют)
+      if (meal.cuisine_type === 'serbian' || meal.cuisine_type === 'balkan') {
+        // Небольшой бонус для сербской кухни
+        if (preferences?.cuisine_types?.includes('serbian') || !preferences?.cuisine_types) {
+          const adjustedScore = score * 0.95 // 5% бонус
+          if (adjustedScore < bestScore) {
+            bestScore = adjustedScore
+            bestMeal = meal
+          }
+          continue
+        }
+      }
 
       if (score < bestScore) {
         bestScore = score

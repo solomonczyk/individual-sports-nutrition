@@ -75,28 +75,92 @@ class MealPlanService:
     ) -> Dict:
         """
         Enhance meal plan with AI optimization
+        
+        Enhanced with:
+        - Allergy and ingredient filtering
+        - Meal diversity optimization
+        - Better Serbian cuisine prioritization
+        - Improved macro balancing
         """
+        preferences = request.preferences or {}
+        goal = preferences.get("goal", "maintain")
+        activity_level = preferences.get("activity_level", "moderate")
+        
         # Calculate optimal meal distribution
         meal_distribution = self.meal_planner.calculate_meal_distribution(
             request.target_calories,
-            request.preferences.get("goal", "maintain") if request.preferences else "maintain",
-            request.preferences.get("activity_level", "moderate") if request.preferences else "moderate",
+            goal,
+            activity_level,
         )
         
         # Get optimal meal times
-        meal_times = self.meal_planner.get_optimal_meal_times(
-            request.preferences.get("goal", "maintain") if request.preferences else "maintain",
-            request.preferences.get("activity_level", "moderate") if request.preferences else "moderate",
-        )
+        meal_times = self.meal_planner.get_optimal_meal_times(goal, activity_level)
         
         # Optimize meals if available
         if "meals" in base_plan and base_plan["meals"]:
-            # Prioritize Serbian cuisine if preference exists
+            available_meals = base_plan["meals"]
+            
+            # Step 1: Filter by allergies and excluded ingredients
+            available_meals = self.meal_planner.filter_meals_by_preferences(
+                available_meals,
+                preferences,
+                request.exclude_ingredients,
+            )
+            
+            # Step 2: Prioritize Serbian cuisine if preference exists
+            serbian_ratio = 0.6  # Default 60% Serbian
             if request.cuisine_types and "serbian" in [c.lower() for c in request.cuisine_types]:
-                base_plan["meals"] = self.meal_planner.prioritize_serbian_cuisine(
-                    base_plan["meals"],
-                    request.preferences,
+                available_meals = self.meal_planner.prioritize_serbian_cuisine(
+                    available_meals,
+                    preferences,
+                    serbian_ratio,
                 )
+            
+            # Step 3: Ensure meal diversity (avoid repeats)
+            selected_meals = []
+            for meal_item in base_plan.get("meals", []):
+                if meal_item.get("meal"):
+                    selected_meals.append(meal_item["meal"])
+            
+            # Optimize meal selection for each meal type
+            optimized_meals = []
+            for meal_item in base_plan.get("meals", []):
+                meal_type = meal_item.get("meal_type", "")
+                
+                if meal_type and available_meals:
+                    # Get target macros for this meal
+                    meal_target_calories = meal_distribution.get(meal_type, request.target_calories * 0.25)
+                    meal_target_protein = request.target_protein * (meal_target_calories / request.target_calories)
+                    
+                    # Select optimal meals
+                    optimal = self.meal_planner.select_optimal_meals(
+                        available_meals,
+                        meal_target_calories,
+                        meal_target_protein,
+                        meal_type,
+                        goal,
+                        preferences,
+                        request.exclude_ingredients,
+                        selected_meals,
+                    )
+                    
+                    # Use best matching meal
+                    if optimal:
+                        meal_item["meal"] = optimal[0]
+                        optimized_meals.append(optimal[0])
+            
+            # Ensure diversity across all selected meals
+            if optimized_meals:
+                diversified = self.meal_planner.ensure_meal_diversity(
+                    optimized_meals,
+                    available_meals,
+                    max_repeats=1,
+                )
+                
+                # Update meals with diversified selection
+                for i, meal_item in enumerate(base_plan.get("meals", [])):
+                    if i < len(diversified):
+                        meal_item["meal"] = diversified[i]
             
             # Optimize meal timing
             for meal_item in base_plan.get("meals", []):
@@ -107,8 +171,10 @@ class MealPlanService:
         # Add optimization metadata
         base_plan["optimization"] = {
             "meal_distribution": meal_distribution,
-            "algorithm_version": "1.0",
+            "algorithm_version": "1.1",  # Updated version
             "enhanced": True,
+            "diversity_optimized": True,
+            "allergies_checked": bool(request.exclude_ingredients or preferences.get("allergies")),
         }
         
         return base_plan

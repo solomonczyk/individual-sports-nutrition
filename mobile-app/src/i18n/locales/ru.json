@@ -1,0 +1,16 @@
+{
+  "welcome": "Добро пожаловать",
+  "welcome_subtitle": "Персонализированное спортивное питание",
+  "get_started": "Начать",
+  "login": "Войти",
+  "register": "Регистрация",
+  "email": "Email",
+  "password": "Пароль",
+  "confirm_password": "Подтвердите пароль",
+  "next": "Далее",
+  "back": "Назад",
+  "skip": "Пропустить",
+  "language": "Язык",
+  "select_language": "Выберите язык"
+}
+

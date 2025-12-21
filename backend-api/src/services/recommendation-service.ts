@@ -2,6 +2,7 @@ import { HealthProfileService } from './health-profile-service'
 import { ProductService } from './product-service'
 import { ContraindicationRepository } from '../repositories/contraindication-repository'
 import { AIServiceClient } from './ai-service-client'
+import { NutritionCalculator, CalculationResult } from './nutrition-calculator'
 import { Product, ProductWithTranslation } from '../models/product'
 import { HealthProfile } from '../models/health-profile'
 
@@ -27,16 +28,19 @@ export class RecommendationService {
   private productService: ProductService
   private contraindicationRepository: ContraindicationRepository
   private aiServiceClient: AIServiceClient
+  private nutritionCalculator: NutritionCalculator
 
   constructor() {
     this.healthProfileService = new HealthProfileService()
     this.productService = new ProductService()
     this.contraindicationRepository = new ContraindicationRepository()
     this.aiServiceClient = new AIServiceClient()
+    this.nutritionCalculator = new NutritionCalculator()
   }
 
   /**
    * Получить рекомендации продуктов для пользователя
+   * Использует улучшенный алгоритм оценки с учетом индивидуальных потребностей
    */
   async getRecommendations(
     userId: string,
@@ -47,6 +51,15 @@ export class RecommendationService {
       throw new Error('Health profile not found')
     }
 
+    // Рассчитываем индивидуальные потребности пользователя
+    let nutritionalNeeds: CalculationResult | null = null
+    try {
+      nutritionalNeeds = this.nutritionCalculator.calculateFullNeeds(profile)
+    } catch (error) {
+      // Если не удалось рассчитать, продолжаем без индивидуальных потребностей
+      console.warn('Could not calculate nutritional needs, using default scoring')
+    }
+
     // Получаем все доступные продукты
     const { products } = await this.productService.getList({ available: true }, 200, 0)
 
@@ -55,9 +68,9 @@ export class RecommendationService {
       ? products.filter((p) => !options.excludeProductIds!.includes(p.id))
       : products
 
-    // Оцениваем каждый продукт
+    // Оцениваем каждый продукт с учетом индивидуальных потребностей
     const recommendations = await Promise.all(
-      filteredProducts.map((product) => this.evaluateProduct(product, profile))
+      filteredProducts.map((product) => this.evaluateProduct(product, profile, nutritionalNeeds))
     )
 
     // Сортируем по оценке и фильтруем противопоказания
@@ -78,10 +91,12 @@ export class RecommendationService {
 
   /**
    * Оценить продукт для пользователя
+   * Улучшенная версия с учетом индивидуальных потребностей
    */
   private async evaluateProduct(
     product: ProductWithTranslation,
-    profile: HealthProfile
+    profile: HealthProfile,
+    nutritionalNeeds: CalculationResult | null = null
   ): Promise<ProductRecommendation> {
     let score = 50 // Базовый балл
     const reasons: string[] = []
@@ -116,9 +131,9 @@ export class RecommendationService {
       })
     }
 
-    // Оценка по цели пользователя
+    // Оценка по цели пользователя (улучшенная с учетом индивидуальных потребностей)
     if (profile.goal) {
-      score += this.scoreByGoal(product, profile.goal, reasons)
+      score += this.scoreByGoal(product, profile.goal, reasons, nutritionalNeeds)
     }
 
     // Оценка по типу продукта и активности
@@ -126,10 +141,21 @@ export class RecommendationService {
       score += this.scoreByActivityLevel(product, profile.activity_level, reasons)
     }
 
+    // Оценка по индивидуальным потребностям в макронутриентах
+    if (nutritionalNeeds) {
+      score += this.scoreByNutritionalNeeds(product, nutritionalNeeds, profile, reasons)
+    }
+
     // Бонус за наличие бренда
     if (product.brand?.verified) {
       score += 5
       reasons.push('Verified brand')
+    }
+
+    // Бонус за качество продукта (если есть информация о качестве)
+    if (product.brand?.premium) {
+      score += 3
+      reasons.push('Premium quality product')
     }
 
     return {
@@ -147,9 +173,16 @@ export class RecommendationService {
 
   /**
    * Оценка продукта по цели пользователя
+   * Улучшенная версия с учетом индивидуальных потребностей
    */
-  private scoreByGoal(product: Product, goal: string, reasons: string[]): number {
+  private scoreByGoal(
+    product: Product,
+    goal: string,
+    reasons: string[],
+    nutritionalNeeds: CalculationResult | null = null
+  ): number {
     let score = 0
+    const macros = product.macros
 
     switch (goal) {
       case 'mass':
@@ -157,28 +190,54 @@ export class RecommendationService {
         if (product.type === 'protein') {
           score += 20
           reasons.push('High protein for muscle mass gain')
+          
+          // Дополнительный бонус если белок соответствует индивидуальным потребностям
+          if (nutritionalNeeds && macros.protein > 0) {
+            const dailyProtein = nutritionalNeeds.protein
+            const proteinContribution = macros.protein / dailyProtein
+            // Оптимально: 10-25% дневной нормы белка на порцию
+            if (proteinContribution >= 0.10 && proteinContribution <= 0.25) {
+              score += 8
+              reasons.push(`Provides ${Math.round(proteinContribution * 100)}% of daily protein needs`)
+            } else if (proteinContribution > 0.25 && proteinContribution <= 0.40) {
+              score += 5
+            }
+          }
         }
         if (product.type === 'creatine') {
           score += 15
           reasons.push('Creatine supports muscle growth')
         }
-        if (product.macros.calories > 200) {
+        // Более точная оценка калорийности для набора массы
+        if (macros.calories >= 200 && macros.calories <= 400) {
           score += 10
-          reasons.push('High calorie content')
+          reasons.push('Optimal calorie content for mass gain')
+        } else if (macros.calories > 400) {
+          score += 5
         }
         break
 
       case 'cut':
         // Для сушки важны белки и низкие калории
-        if (product.type === 'protein' && product.macros.calories < 150) {
+        if (product.type === 'protein' && macros.calories < 150) {
           score += 20
           reasons.push('Low-calorie protein for cutting')
+        } else if (product.type === 'protein') {
+          score += 15
+          reasons.push('High protein for cutting')
         }
         if (product.type === 'fat_burner') {
           score += 15
           reasons.push('Fat burner for cutting phase')
         }
-        if (product.macros.fats < 5) {
+        // Штраф за высокую калорийность
+        if (macros.calories > 250) {
+          score -= 5
+        } else if (macros.calories <= 150) {
+          score += 8
+          reasons.push('Low calorie content')
+        }
+        if (macros.fats < 5) {
           score += 5
           reasons.push('Low fat content')
         }
@@ -194,8 +253,12 @@ export class RecommendationService {
           score += 15
           reasons.push('Pre-workout for performance')
         }
-        if (product.macros.carbs > 30) {
-          score += 10
+        // Углеводы важны для выносливости
+        if (macros.carbs >= 30 && macros.carbs <= 60) {
+          score += 12
+          reasons.push('Optimal carb content for energy')
+        } else if (macros.carbs > 30) {
+          score += 8
           reasons.push('High carb content for energy')
         }
         break
@@ -209,6 +272,13 @@ export class RecommendationService {
         if (product.type === 'vitamin') {
           score += 10
           reasons.push('Vitamins for overall health')
+        }
+        // Сбалансированный состав макронутриентов
+        const hasProtein = macros.protein > 15
+        const hasCarbs = macros.carbs > 10
+        if (hasProtein && hasCarbs) {
+          score += 5
+          reasons.push('Balanced macronutrient profile')
         }
         break
     }
@@ -238,6 +308,11 @@ export class RecommendationService {
           score += 10
           reasons.push('Amino acids for recovery')
         }
+        // Более высокие потребности в белке при высокой активности
+        if (product.type === 'protein' && product.macros.protein >= 25) {
+          score += 8
+          reasons.push('High protein content ideal for high activity')
+        }
         break
 
       case 'moderate':
@@ -253,7 +328,83 @@ export class RecommendationService {
           score += 10
           reasons.push('Vitamins for low activity')
         }
+        // Низкокалорийные продукты для низкой активности
+        if (product.macros.calories < 150) {
+          score += 5
+        }
         break
+    }
+
+    return score
+  }
+
+  /**
+   * Оценка продукта на основе индивидуальных потребностей в макронутриентах
+   */
+  private scoreByNutritionalNeeds(
+    product: Product,
+    nutritionalNeeds: CalculationResult,
+    profile: HealthProfile,
+    reasons: string[]
+  ): number {
+    let score = 0
+    const macros = product.macros
+    const dailyProtein = nutritionalNeeds.protein
+    const dailyCalories = nutritionalNeeds.calories
+
+    // Оценка белка: насколько продукт покрывает дневные потребности
+    if (macros.protein > 0 && dailyProtein > 0) {
+      const proteinContribution = macros.protein / dailyProtein
+      
+      // Оптимальный диапазон: 10-25% дневной нормы на порцию
+      if (proteinContribution >= 0.10 && proteinContribution <= 0.25) {
+        score += 12
+        reasons.push(`Provides ${Math.round(proteinContribution * 100)}% of daily protein`)
+      } else if (proteinContribution > 0.25 && proteinContribution <= 0.40) {
+        score += 8
+        reasons.push(`High protein: ${Math.round(proteinContribution * 100)}% of daily needs`)
+      } else if (proteinContribution >= 0.05 && proteinContribution < 0.10) {
+        score += 5
+      }
+    }
+
+    // Оценка калорийности относительно цели
+    if (dailyCalories > 0 && macros.calories > 0) {
+      const calorieContribution = macros.calories / dailyCalories
+      
+      if (profile.goal === 'cut') {
+        // Для сушки: низкая калорийность лучше
+        if (calorieContribution <= 0.08) {
+          score += 8
+          reasons.push('Low calorie content suitable for cutting')
+        } else if (calorieContribution > 0.15) {
+          score -= 5 // Штраф за высокую калорийность при сушке
+        }
+      } else if (profile.goal === 'mass') {
+        // Для набора массы: умеренная-высокая калорийность
+        if (calorieContribution >= 0.10 && calorieContribution <= 0.20) {
+          score += 8
+          reasons.push('Optimal calorie content for mass gain')
+        }
+      }
+    }
+
+    // Оценка баланса макронутриентов
+    const totalMacros = macros.protein + macros.carbs + macros.fats
+    if (totalMacros > 0) {
+      const proteinRatio = macros.protein / totalMacros
+      const carbRatio = macros.carbs / totalMacros
+      
+      // Для белка: оптимальный диапазон 30-50% от макронутриентов
+      if (proteinRatio >= 0.30 && proteinRatio <= 0.50) {
+        score += 5
+      }
+      
+      // Для углеводов: хороший баланс с белком
+      if (profile.goal === 'endurance' && carbRatio >= 0.40) {
+        score += 5
+        reasons.push('High carb ratio ideal for endurance')
+      }
     }
 
     return score

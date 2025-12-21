@@ -1,0 +1,23 @@
+{
+  "GOAL_WEIGHTS": {
+    "mass": {"protein": 0.4, "calories": 0.3, "creatine": 0.2, "pre_workout": 0.1},
+    "cut": {"protein": 0.35, "fat_burner": 0.3, "low_calories": 0.25, "vitamin": 0.1},
+    "maintain": {"protein": 0.3, "balanced": 0.3, "vitamin": 0.2, "general": 0.2},
+    "endurance": {"amino": 0.3, "carbs": 0.25, "hydration": 0.25, "protein": 0.2}
+  },
+  "ACTIVITY_MULTIPLIERS": {"low": 0.8, "moderate": 1.0, "high": 1.2, "very_high": 1.4},
+  "PROTEIN_REQUIREMENTS": {"mass": 2.2, "cut": 2.5, "endurance": 1.8, "maintain": 2.0},
+  "MEAL_DISTRIBUTION": {
+    "mass": {"breakfast": 0.25, "lunch": 0.35, "dinner": 0.25, "snacks": 0.15},
+    "cut": {"breakfast": 0.30, "lunch": 0.35, "dinner": 0.25, "snacks": 0.10},
+    "maintain": {"breakfast": 0.25, "lunch": 0.35, "dinner": 0.25, "snacks": 0.15},
+    "endurance": {"breakfast": 0.20, "lunch": 0.30, "dinner": 0.25, "snacks": 0.25}
+  },
+  "SERBIAN_MEAL_TIMES": {
+    "breakfast": "08:00",
+    "snack1": "11:00",
+    "lunch": "13:30",
+    "snack2": "17:00",
+    "dinner": "19:30"
+  }
+}

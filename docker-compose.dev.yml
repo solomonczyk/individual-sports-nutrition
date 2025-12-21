@@ -1,0 +1,113 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: sports-nutrition-db
+    environment:
+      POSTGRES_DB: individual_sports_nutrition
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD:-postgres}
+      POSTGRES_INITDB_ARGS: "-c shared_preload_libraries=pg_stat_statements"
+    ports:
+      - "${DATABASE_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/migrations:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - sports-nutrition
+    restart: unless-stopped
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: sports-nutrition-cache
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - sports-nutrition
+    restart: unless-stopped
+
+  # Database Backup Service
+  backup-service:
+    image: postgres:15-alpine
+    container_name: sports-nutrition-backup
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      PGPASSWORD: ${DATABASE_PASSWORD:-postgres}
+      DATABASE_NAME: individual_sports_nutrition
+      DATABASE_USER: postgres
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+      BACKUP_DIR: /backups
+      RETENTION_DAYS: 30
+    volumes:
+      - ./scripts/backup-postgres.sh:/backup-postgres.sh:ro
+      - backup_data:/backups
+    entrypoint: |
+      sh -c '
+      apk add --no-cache bash gzip
+      
+      # Run initial backup
+      echo "Running initial backup..."
+      bash /backup-postgres.sh backup
+      
+      # Schedule backups every 6 hours
+      while true; do
+        sleep 21600
+        echo "Running scheduled backup..."
+        bash /backup-postgres.sh backup
+      done
+      '
+    networks:
+      - sports-nutrition
+    restart: unless-stopped
+
+  # pgAdmin (optional, for database management)
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: sports-nutrition-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@example.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin}
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    ports:
+      - "${PGADMIN_PORT:-5050}:80"
+    depends_on:
+      - postgres
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    networks:
+      - sports-nutrition
+    restart: unless-stopped
+    profiles:
+      - dev # Only start with 'docker-compose --profile dev up'
+
+networks:
+  sports-nutrition:
+    driver: bridge
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  backup_data:
+    driver: local
+  pgadmin_data:
+    driver: local

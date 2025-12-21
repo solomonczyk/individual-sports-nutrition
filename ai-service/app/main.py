@@ -5,6 +5,7 @@ from app.routers.health import router as health_router
 from app.routers import recommendations
 from app.routers import meal_plan as meal_plan_router
 from app.utils.logger import logger
+from app.utils.ml_config import get_ml_config
 
 settings = get_settings()
 
@@ -31,6 +32,15 @@ app.include_router(meal_plan_router.router)
 async def startup_event():
     logger.info(f"Starting {settings.app_name} v{settings.app_version}")
     logger.info(f"Server running on {settings.host}:{settings.port}")
+    try:
+        ml_cfg = get_ml_config()
+        if not ml_cfg:
+            logger.warning("ML config not found or failed to load (app/ml_config.json)")
+        else:
+            keys = list(ml_cfg.keys())
+            logger.info(f"ML config loaded with keys: {keys}")
+    except Exception as e:
+        logger.warning(f"Error loading ML config: {e}")
 
 
 @app.on_event("shutdown")

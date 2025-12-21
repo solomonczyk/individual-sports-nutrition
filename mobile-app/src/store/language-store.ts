@@ -11,7 +11,7 @@ interface LanguageState {
 export const useLanguageStore = create<LanguageState>()(
   persist(
     (set) => ({
-      language: 'sr',
+      language: 'en',
       setLanguage: (lang) => {
         i18n.locale = lang
         set({ language: lang })

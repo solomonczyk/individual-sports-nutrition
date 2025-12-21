@@ -1,7 +1,7 @@
 import Constants from 'expo-constants'
 
 export const API_CONFIG = {
-  baseURL: Constants.expoConfig?.extra?.apiUrl || 'http://localhost:3001/api/v1',
+  baseURL: Constants.expoConfig?.extra?.apiUrl || 'http://localhost:3000/api/v1',
   timeout: 30000,
 }
 

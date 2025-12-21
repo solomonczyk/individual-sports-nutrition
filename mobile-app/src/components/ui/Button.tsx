@@ -1,4 +1,5 @@
 import { TouchableOpacity, Text, ActivityIndicator } from 'react-native'
+import { forwardRef } from 'react'
 import { cn } from '../utils/cn'
 
 interface ButtonProps {
@@ -10,14 +11,14 @@ interface ButtonProps {
   className?: string
 }
 
-export function Button({
+export const Button = forwardRef<TouchableOpacity, ButtonProps>(function Button({
   title,
   onPress,
   variant = 'primary',
   disabled = false,
   loading = false,
   className,
-}: ButtonProps) {
+}, ref) {
   const baseClasses = 'px-6 py-4 rounded-lg items-center justify-center min-h-[48px]'
   
   const variantClasses = {
@@ -34,6 +35,7 @@ export function Button({
 
   return (
     <TouchableOpacity
+      ref={ref}
       onPress={onPress}
       disabled={disabled || loading}
       className={cn(baseClasses, variantClasses[variant], disabled && 'opacity-50', className)}
@@ -45,5 +47,5 @@ export function Button({
       )}
     </TouchableOpacity>
   )
-}
+})
 
