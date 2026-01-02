@@ -708,3 +708,11 @@
 - **CORS Fix**: Hardcoded allowed origins in `backend-api` to support mobile-web at `http://localhost:8081`.
 - **Database Fix**: Moved `sports-nutrition-db` to port `5433` in `docker-compose.dev.yml` to avoid conflict with local host postgres.
 - **Standardization**: Unified language codes to `uk` (Ukrainian) across mobile and backend services.
+- **API Debugging**: Resolved 404 on `/dosage/calculate` and 500 on `/meal-plan/generate` by seeding missing health profiles and nutrition plans for existing users.
+- **Service Optimization**: Improved `MealPlanGenerator` with explicit error codes (`PLAN_NOT_FOUND`) and status codes.
+- **UI Maintenance**: Fixed `pointerEvents` deprecation warning in `AdviceScreen`.
+
+**Next Steps**:
+- Verify dosage calculation with real product IDs.
+- Expand Serbian cuisine database entries.
+- Implement shopping options comparison logic.
