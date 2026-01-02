@@ -1,7 +1,7 @@
 import { Pool } from 'pg'
 import { pool } from '../config/database'
 
-export type Language = 'sr' | 'hu' | 'ro' | 'en' | 'ru' | 'ua'
+export type Language = 'sr' | 'hu' | 'ro' | 'en' | 'ru' | 'uk'
 
 interface TranslationCache {
   [key: string]: {
@@ -90,7 +90,7 @@ const defaultTranslations: Record<string, Record<Language, string>> = {
     hu: 'Jogosulatlan',
     ro: 'Neautorizat',
     ru: 'Не авторизован',
-    ua: 'Не авторизовано',
+    uk: 'Не авторизовано',
   },
   'error.user_exists': {
     en: 'User with this email already exists',
@@ -98,7 +98,7 @@ const defaultTranslations: Record<string, Record<Language, string>> = {
     hu: 'Ez az e-mail cím már használatban van',
     ro: 'Utilizatorul cu acest e-mail există deja',
     ru: 'Пользователь с таким email уже существует',
-    ua: 'Користувач з таким email вже існує',
+    uk: 'Користувач з таким email вже існує',
   },
   'error.invalid_credentials': {
     en: 'Invalid email or password',
@@ -106,7 +106,7 @@ const defaultTranslations: Record<string, Record<Language, string>> = {
     hu: 'Érvénytelen e-mail vagy jelszó',
     ro: 'E-mail sau parolă incorectă',
     ru: 'Неверный email или пароль',
-    ua: 'Невірний email або пароль',
+    uk: 'Невірний email або пароль',
   },
   'error.profile_not_found': {
     en: 'Health profile not found. Please create your profile first.',
@@ -114,7 +114,7 @@ const defaultTranslations: Record<string, Record<Language, string>> = {
     hu: 'Az egészségügyi profil nem található. Kérjük, először hozza létre a profilját.',
     ro: 'Profilul de sănătate nu a fost găsit. Vă rugăm să creați mai întâi profilul.',
     ru: 'Профиль здоровья не найден. Пожалуйста, сначала создайте профиль.',
-    ua: 'Профіль здоров\'я не знайдено. Будь ласка, спочатку створіть профіль.',
+    uk: 'Профіль здоров\'я не знайдено. Будь ласка, спочатку створіть профіль.',
   },
   'error.incomplete_profile': {
     en: 'Missing required profile fields',
@@ -122,7 +122,7 @@ const defaultTranslations: Record<string, Record<Language, string>> = {
     hu: 'Hiányoznak a kötelező profil adatok',
     ro: 'Lipsesc câmpurile obligatorii ale profilului',
     ru: 'Отсутствуют обязательные поля профиля',
-    ua: 'Відсутні обов\'язкові поля профілю',
+    uk: 'Відсутні обов\'язкові поля профілю',
   },
   'error.validation_error': {
     en: 'Validation error',
@@ -130,7 +130,7 @@ const defaultTranslations: Record<string, Record<Language, string>> = {
     hu: 'Érvényesítési hiba',
     ro: 'Eroare de validare',
     ru: 'Ошибка валидации',
-    ua: 'Помилка валідації',
+    uk: 'Помилка валідації',
   },
 }
 

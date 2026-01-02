@@ -23,7 +23,11 @@ class Settings(BaseSettings):
     backend_api_url: str = "http://localhost:3000"
     
     # CORS
-    cors_origins: str = "http://localhost:3000,http://localhost:3001"
+    cors_origins: str = "http://localhost:3000,http://localhost:3001,http://localhost:8081"
+    
+    # AI Models
+    openai_api_key: str = ""
+    openai_model: str = "gpt-4o-mini"
     
     class Config:
         env_file = ".env"

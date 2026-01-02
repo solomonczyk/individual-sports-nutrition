@@ -199,7 +199,7 @@ export class PriceComparisonController {
     try {
       const productId = (req as any).params?.productId as string
       const packageId = (req as any).query?.package_id as string | undefined
-      
+
       if (!productId) {
         const error: ApiError = new Error('Product ID is required')
         error.statusCode = 400

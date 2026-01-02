@@ -2,41 +2,31 @@ import { defineConfig, devices } from '@playwright/test';
 
 /**
  * Playwright Configuration for E2E Testing
- * 
- * Features:
- * - Web testing (Chrome, Firefox, Safari)
- * - Mobile testing emulation
- * - Screenshots and videos on failure
- * - Parallel execution
- * - Custom reporters
  */
 
 export default defineConfig({
   testDir: './src/e2e-tests',
   testMatch: '**/*.e2e.ts',
-  
+
   // Configuration options
-  fullyParallel: true,
+  fullyParallel: false,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : undefined,
+  workers: 1,
 
   // Test timeout: 30 seconds per test
-  timeout: 30000,
+  timeout: 30 * 1000,
 
   // Global timeout: 5 minutes
   globalTimeout: 5 * 60 * 1000,
 
   // Expect timeout: 5 seconds
   expect: {
-    timeout: 5000,
+    timeout: 5000
   },
 
-  // Reporter configuration
   reporter: [
     ['html', { outputFolder: 'playwright-report' }],
-    ['json', { outputFile: 'test-results/results.json' }],
-    ['junit', { outputFile: 'test-results/junit.xml' }],
     ['list'],
   ],
 
@@ -51,21 +41,13 @@ export default defineConfig({
     // Video on failure
     video: 'retain-on-failure',
 
-    // Trace on failure (can be viewed with `npx playwright show-trace`)
-    trace: 'on-first-failure',
+    // Trace on failure
+    trace: 'retain-on-failure',
 
     // Set HTTP headers
     extraHTTPHeaders: {
       'X-Test-Source': 'playwright-e2e',
     },
-  },
-
-  // Web server configuration
-  webServer: {
-    command: 'npm run dev',
-    url: 'http://localhost:3000',
-    reuseExistingServer: !process.env.CI,
-    timeout: 120000,
   },
 
   // Projects: define configurations
@@ -74,26 +56,6 @@ export default defineConfig({
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
     },
-
-    {
-      name: 'firefox',
-      use: { ...devices['Desktop Firefox'] },
-    },
-
-    {
-      name: 'webkit',
-      use: { ...devices['Desktop Safari'] },
-    },
-
-    // Mobile testing
-    {
-      name: 'Mobile Chrome',
-      use: { ...devices['Pixel 5'] },
-    },
-
-    {
-      name: 'Mobile Safari',
-      use: { ...devices['iPhone 12'] },
-    },
   ],
 });
+

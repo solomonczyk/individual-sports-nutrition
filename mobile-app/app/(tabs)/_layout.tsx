@@ -1,25 +1,40 @@
 import { Tabs } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
+import { View, Platform } from 'react-native'
+import { DesignTokens } from '../../src/constants/DesignTokens'
 
 export default function TabsLayout() {
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: '#2563eb',
-        tabBarInactiveTintColor: '#6b7280',
+        tabBarActiveTintColor: DesignTokens.colors.primary,
+        tabBarInactiveTintColor: DesignTokens.colors.textTertiary,
         tabBarStyle: {
-          borderTopWidth: 1,
-          borderTopColor: '#e5e7eb',
+          position: 'absolute',
+          bottom: 24,
+          left: 20,
+          right: 20,
+          backgroundColor: DesignTokens.colors.surfaceElevated,
+          borderRadius: 32,
+          height: 64,
+          borderTopWidth: 0,
+          borderWidth: 1,
+          borderColor: DesignTokens.colors.glassBorder,
+          paddingBottom: Platform.OS === 'ios' ? 0 : 0,
+          ...DesignTokens.shadows.premium,
         },
+        tabBarShowLabel: false,
       }}
     >
       <Tabs.Screen
         name="home"
         options={{
           title: 'Home',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="home" size={size} color={color} />
+          tabBarIcon: ({ color, size, focused }) => (
+            <View style={focused && styles.activeIconContainer}>
+              <Ionicons name={focused ? "home" : "home-outline"} size={24} color={color} />
+            </View>
           ),
         }}
       />
@@ -27,8 +42,10 @@ export default function TabsLayout() {
         name="profile"
         options={{
           title: 'Profile',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="person" size={size} color={color} />
+          tabBarIcon: ({ color, size, focused }) => (
+            <View style={focused && styles.activeIconContainer}>
+              <Ionicons name={focused ? "person" : "person-outline"} size={24} color={color} />
+            </View>
           ),
         }}
       />
@@ -36,8 +53,21 @@ export default function TabsLayout() {
         name="progress"
         options={{
           title: 'Progress',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="stats-chart" size={size} color={color} />
+          tabBarIcon: ({ color, size, focused }) => (
+            <View style={focused && styles.activeIconContainer}>
+              <Ionicons name={focused ? "stats-chart" : "stats-chart-outline"} size={24} color={color} />
+            </View>
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="advice"
+        options={{
+          title: 'AI Advice',
+          tabBarIcon: ({ color, size, focused }) => (
+            <View style={focused && styles.activeIconContainer}>
+              <Ionicons name={focused ? "sparkles" : "sparkles-outline"} size={24} color={color} />
+            </View>
           ),
         }}
       />
@@ -45,12 +75,22 @@ export default function TabsLayout() {
         name="settings"
         options={{
           title: 'Settings',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="settings" size={size} color={color} />
+          tabBarIcon: ({ color, size, focused }) => (
+            <View style={focused && styles.activeIconContainer}>
+              <Ionicons name={focused ? "settings" : "settings-outline"} size={24} color={color} />
+            </View>
           ),
         }}
       />
     </Tabs>
   )
+}
+
+const styles = {
+  activeIconContainer: {
+    backgroundColor: `${DesignTokens.colors.primary}15`,
+    padding: 10,
+    borderRadius: 20,
+  }
 }
 

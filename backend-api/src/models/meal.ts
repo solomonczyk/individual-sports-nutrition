@@ -12,6 +12,7 @@ export interface Meal {
   instructions_key: string | null
   total_macros: MacroNutrients
   total_micronutrients: MicroNutrients
+  ingredients?: any[]
   image_url: string | null
   created_at: Date
   updated_at: Date

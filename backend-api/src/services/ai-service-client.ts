@@ -32,6 +32,18 @@ export interface AIRecommendationsResponse {
   user_profile_summary: any
 }
 
+export interface AIAdviceRequest {
+  user_id: string
+  query: string
+  user_profile?: any
+}
+
+export interface AIAdviceResponse {
+  advice: string
+  sources: string[]
+  status: string
+}
+
 export class AIServiceClient {
   private client: AxiosInstance
   private baseURL: string
@@ -68,6 +80,30 @@ export class AIServiceClient {
     } catch (error: any) {
       // Log error but don't throw - fallback to regular recommendations
       logger.warn('AI service unavailable, using fallback recommendations', {
+        error: error.message,
+        url: this.baseURL,
+      })
+      return null
+    }
+  }
+
+  /**
+   * Get personalized AI advice via RAG
+   */
+  async getAIAdvice(request: AIAdviceRequest): Promise<AIAdviceResponse | null> {
+    try {
+      const response = await this.client.post<{
+        success: boolean
+        data: AIAdviceResponse
+      }>('/advice/personalized', request, {
+        headers: {
+          'X-User-ID': request.user_id,
+        },
+      })
+
+      return response.data.data
+    } catch (error: any) {
+      logger.warn('AI advice service unavailable', {
         error: error.message,
         url: this.baseURL,
       })

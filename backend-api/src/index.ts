@@ -10,8 +10,12 @@ import routes from './routes'
 const app = express()
 
 app.use(helmet())
+
+const allowedOrigins = ['http://localhost:3001', 'http://localhost:8081']
+logger.info('Configuring CORS', { allowedOrigins })
+
 app.use(cors({
-  origin: config.CORS_ORIGIN,
+  origin: allowedOrigins,
   credentials: true,
 }))
 app.use(express.json())

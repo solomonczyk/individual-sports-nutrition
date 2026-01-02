@@ -45,6 +45,6 @@ export const config: EnvConfig = {
   JWT_SECRET: getEnvVar('JWT_SECRET', 'dev-secret-change-in-production'),
   JWT_EXPIRES_IN: getEnvVar('JWT_EXPIRES_IN', '7d'),
   AI_SERVICE_URL: getEnvVar('AI_SERVICE_URL', 'http://localhost:8000'),
-  CORS_ORIGIN: getEnvVar('CORS_ORIGIN', 'http://localhost:3001'),
+  CORS_ORIGIN: getEnvVar('CORS_ORIGIN', 'http://localhost:3001,http://localhost:8081'),
 }
 

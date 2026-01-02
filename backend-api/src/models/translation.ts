@@ -1,6 +1,6 @@
 export interface Translation {
   key: string
-  language: 'sr' | 'hu' | 'ro' | 'en' | 'ru' | 'ua'
+  language: 'sr' | 'hu' | 'ro' | 'en' | 'ru' | 'uk'
   text: string
 }
 

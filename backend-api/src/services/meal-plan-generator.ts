@@ -34,12 +34,17 @@ export class MealPlanGenerator {
     // Получаем план питания пользователя
     const nutritionPlan = await this.nutritionPlanService.getByUserId(userId)
     if (!nutritionPlan || !nutritionPlan.calories) {
-      throw new Error('Nutrition plan not found. Please calculate your nutrition needs first.')
+      const error = new Error('Nutrition plan not found. Please calculate your nutrition needs first.') as any
+      error.statusCode = 404
+      error.code = 'PLAN_NOT_FOUND'
+      throw error
     }
 
     const profile = await this.healthProfileService.getByUserId(userId)
     if (!profile) {
-      throw new Error('Health profile not found')
+      const error = new Error('Health profile not found') as any
+      error.statusCode = 404
+      throw error
     }
 
     // Распределяем калории и БЖУ по приемам пищи

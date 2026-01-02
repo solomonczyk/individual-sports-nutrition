@@ -7,7 +7,7 @@ import { z } from 'zod'
 const registerSchema = z.object({
   email: z.string().email(),
   password: z.string().min(6),
-  preferred_language: z.enum(['sr', 'hu', 'ro', 'en', 'ru', 'ua']).optional(),
+  preferred_language: z.enum(['sr', 'hu', 'ro', 'en', 'ru', 'uk']).optional(),
 })
 
 const loginSchema = z.object({

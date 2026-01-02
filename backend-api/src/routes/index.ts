@@ -8,6 +8,7 @@ import recommendationsRouter from './recommendations'
 import dosageRouter from './dosage'
 import mealPlanRouter from './meal-plan'
 import progressRouter from './progress'
+import adviceRouter from './advice'
 
 const router = Router()
 
@@ -28,6 +29,7 @@ router.use('/recommendations', recommendationsRouter)
 router.use('/dosage', dosageRouter)
 router.use('/meal-plan', mealPlanRouter)
 router.use('/progress', progressRouter)
+router.use('/advice', adviceRouter)
 
 export default router
 

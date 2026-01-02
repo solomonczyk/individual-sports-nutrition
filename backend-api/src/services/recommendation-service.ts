@@ -190,7 +190,7 @@ export class RecommendationService {
         if (product.type === 'protein') {
           score += 20
           reasons.push('High protein for muscle mass gain')
-          
+
           // Дополнительный бонус если белок соответствует индивидуальным потребностям
           if (nutritionalNeeds && macros.protein > 0) {
             const dailyProtein = nutritionalNeeds.protein
@@ -355,7 +355,7 @@ export class RecommendationService {
     // Оценка белка: насколько продукт покрывает дневные потребности
     if (macros.protein > 0 && dailyProtein > 0) {
       const proteinContribution = macros.protein / dailyProtein
-      
+
       // Оптимальный диапазон: 10-25% дневной нормы на порцию
       if (proteinContribution >= 0.10 && proteinContribution <= 0.25) {
         score += 12
@@ -371,7 +371,7 @@ export class RecommendationService {
     // Оценка калорийности относительно цели
     if (dailyCalories > 0 && macros.calories > 0) {
       const calorieContribution = macros.calories / dailyCalories
-      
+
       if (profile.goal === 'cut') {
         // Для сушки: низкая калорийность лучше
         if (calorieContribution <= 0.08) {
@@ -394,12 +394,12 @@ export class RecommendationService {
     if (totalMacros > 0) {
       const proteinRatio = macros.protein / totalMacros
       const carbRatio = macros.carbs / totalMacros
-      
+
       // Для белка: оптимальный диапазон 30-50% от макронутриентов
       if (proteinRatio >= 0.30 && proteinRatio <= 0.50) {
         score += 5
       }
-      
+
       // Для углеводов: хороший баланс с белком
       if (profile.goal === 'endurance' && carbRatio >= 0.40) {
         score += 5

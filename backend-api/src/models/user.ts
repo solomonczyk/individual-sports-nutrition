@@ -2,7 +2,7 @@ export interface User {
   id: string
   email: string
   password_hash: string
-  preferred_language: 'sr' | 'hu' | 'ro' | 'en' | 'ru' | 'ua'
+  preferred_language: 'sr' | 'hu' | 'ro' | 'en' | 'ru' | 'uk'
   created_at: Date
   updated_at: Date
 }
@@ -10,7 +10,7 @@ export interface User {
 export interface CreateUserInput {
   email: string
   password: string
-  preferred_language?: 'sr' | 'hu' | 'ro' | 'en' | 'ru' | 'ua'
+  preferred_language?: 'sr' | 'hu' | 'ro' | 'en' | 'ru' | 'uk'
 }
 
 export interface UserResponse {

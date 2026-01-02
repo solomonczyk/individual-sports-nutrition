@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { View, Text, ScrollView, RefreshControl } from 'react-native'
+import { View, Text, ScrollView, RefreshControl, StyleSheet, Platform, TouchableOpacity } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { StatusBar } from 'expo-status-bar'
 import { useQuery } from '@tanstack/react-query'
@@ -10,9 +10,12 @@ import { nutritionPlanService } from '../../src/services/nutrition-plan-service'
 import { RecommendationList } from '../../src/components/recommendation/RecommendationList'
 import { DailyMealPlan } from '../../src/components/meal-plan/DailyMealPlan'
 import { LoadingSpinner } from '../../src/components/ui/LoadingSpinner'
-import { Button } from '../../src/components/ui/Button'
+import { ModernButton } from '../../src/components/ui/ModernButton'
+import { DesignTokens } from '../../src/constants/DesignTokens'
+import { GlassCard } from '../../src/components/ui/GlassCard'
 import i18n from '../../src/i18n'
 import { useRouter } from 'expo-router'
+import { Ionicons } from '@expo/vector-icons'
 
 export default function HomeScreen() {
   const { user } = useAuthStore()
@@ -83,59 +86,73 @@ export default function HomeScreen() {
   const isLoading = recommendationsLoading || mealPlanLoading || nutritionPlanLoading
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
-      <StatusBar style="dark" />
+    <SafeAreaView style={styles.container}>
+      <StatusBar style="light" />
       <ScrollView
-        className="flex-1"
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={DesignTokens.colors.primary} />
         }
+        showsVerticalScrollIndicator={false}
       >
-        {/* Header */}
-        <View className="px-6 py-4 bg-blue-50 border-b border-blue-100">
-          <Text className="text-2xl font-bold text-gray-900 mb-1">
-            {i18n.t('welcome')}, {user?.email?.split('@')[0]}
-          </Text>
-          {nutritionPlanData?.data && (
-            <Text className="text-gray-600">
-              Daily goal: {Math.round(nutritionPlanData.data.calories)} kcal
+        {/* Modern Header */}
+        <View style={styles.header}>
+          <View>
+            <Text style={styles.welcomeText}>
+              {i18n.t('welcome')},
             </Text>
-          )}
+            <Text style={styles.userNameText}>
+              {user?.email?.split('@')[0]}
+            </Text>
+          </View>
+          <TouchableOpacity style={styles.notificationButton}>
+            <Ionicons name="notifications-outline" size={24} color={DesignTokens.colors.textPrimary} />
+          </TouchableOpacity>
         </View>
 
-        {/* Nutrition Plan Summary */}
+        {/* Nutrition Plan Summary - Bento Style */}
         {nutritionPlanData?.data && (
-          <View className="px-6 py-4 bg-white border-b border-gray-200">
-            <Text className="text-lg font-semibold text-gray-900 mb-3">
-              Your Nutrition Plan
-            </Text>
-            <View className="flex-row gap-4">
-              <View className="flex-1">
-                <Text className="text-xs text-gray-500 mb-1">Protein</Text>
-                <Text className="text-base font-bold text-gray-900">
-                  {Math.round(nutritionPlanData.data.protein)}g
-                </Text>
+          <View style={styles.bentoContainer}>
+            <GlassCard style={styles.mainBento}>
+              <Text style={styles.bentoLabel}>Daily Target</Text>
+              <Text style={styles.bentoMainValue}>
+                {Math.round(nutritionPlanData.data.calories)}
+                <Text style={styles.bentoUnit}> kcal</Text>
+              </Text>
+              <View style={styles.progressBarBg}>
+                <View style={[styles.progressBarFill, { width: '65%' }]} />
               </View>
-              <View className="flex-1">
-                <Text className="text-xs text-gray-500 mb-1">Carbs</Text>
-                <Text className="text-base font-bold text-gray-900">
-                  {Math.round(nutritionPlanData.data.carbs)}g
-                </Text>
-              </View>
-              <View className="flex-1">
-                <Text className="text-xs text-gray-500 mb-1">Fats</Text>
-                <Text className="text-base font-bold text-gray-900">
-                  {Math.round(nutritionPlanData.data.fats)}g
-                </Text>
-              </View>
+            </GlassCard>
+
+            <View style={styles.bentoRow}>
+              <GlassCard style={styles.smallBento}>
+                <Text style={styles.bentoLabel}>Protein</Text>
+                <Text style={styles.bentoValue}>{Math.round(nutritionPlanData.data.protein)}g</Text>
+              </GlassCard>
+              <GlassCard style={styles.smallBento}>
+                <Text style={styles.bentoLabel}>Carbs</Text>
+                <Text style={styles.bentoValue}>{Math.round(nutritionPlanData.data.carbs)}g</Text>
+              </GlassCard>
+              <GlassCard style={styles.smallBento}>
+                <Text style={styles.bentoLabel}>Fats</Text>
+                <Text style={styles.bentoValue}>{Math.round(nutritionPlanData.data.fats)}g</Text>
+              </GlassCard>
             </View>
           </View>
         )}
 
         {/* Meal Plan Section */}
-        <View className="mb-6">
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Today's Fuel</Text>
+            <TouchableOpacity onPress={() => router.push('/meal')}>
+              <Text style={styles.seeAllText}>See Plan</Text>
+            </TouchableOpacity>
+          </View>
+
           {mealPlanLoading ? (
-            <LoadingSpinner message="Loading meal plan..." />
+            <LoadingSpinner message="Optimizing meals..." />
           ) : mealPlanData?.data ? (
             <DailyMealPlan
               mealPlan={mealPlanData.data}
@@ -144,26 +161,26 @@ export default function HomeScreen() {
               }}
             />
           ) : (
-            <View className="px-6 py-8">
-              <Text className="text-lg font-semibold text-gray-900 mb-2">
-                No meal plan for today
-              </Text>
-              <Text className="text-gray-600 mb-4">
-                Generate a personalized meal plan based on your goals
-              </Text>
-              <Button
-                title="Generate Meal Plan"
+            <GlassCard style={styles.emptyPlanCard}>
+              <Ionicons name="restaurant-outline" size={40} color={DesignTokens.colors.textTertiary} />
+              <Text style={styles.emptyPlanTitle}>No active plan</Text>
+              <Text style={styles.emptyPlanDesc}>Let me build a meal plan that fits your nutrition targets.</Text>
+              <ModernButton
+                title="Generate Evolution Plan"
                 onPress={handleGenerateMealPlan}
-                variant="primary"
+                style={styles.generateButton}
               />
-            </View>
+            </GlassCard>
           )}
         </View>
 
         {/* Recommendations Section */}
-        <View className="mb-6">
+        <View style={[styles.section, { marginBottom: 120 }]}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Performance Stack</Text>
+          </View>
           {recommendationsLoading || dosagesLoading ? (
-            <LoadingSpinner message="Loading recommendations..." />
+            <LoadingSpinner message="Analyzing data..." />
           ) : (
             <RecommendationList
               recommendations={recommendationsData?.data || []}
@@ -181,3 +198,139 @@ export default function HomeScreen() {
     </SafeAreaView>
   )
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: DesignTokens.colors.background,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingBottom: 100,
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: DesignTokens.spacing.lg,
+    paddingTop: DesignTokens.spacing.lg,
+    paddingBottom: DesignTokens.spacing.md,
+  },
+  welcomeText: {
+    fontSize: 16,
+    color: DesignTokens.colors.textSecondary,
+    fontWeight: '500',
+  },
+  userNameText: {
+    fontSize: 28,
+    fontWeight: '900',
+    color: DesignTokens.colors.textPrimary,
+    letterSpacing: -0.5,
+  },
+  notificationButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: DesignTokens.colors.surface,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: DesignTokens.colors.glassBorder,
+  },
+  bentoContainer: {
+    paddingHorizontal: DesignTokens.spacing.lg,
+    gap: DesignTokens.spacing.md,
+    marginBottom: DesignTokens.spacing.xl,
+  },
+  mainBento: {
+    padding: DesignTokens.spacing.lg,
+    backgroundColor: `${DesignTokens.colors.primary}10`,
+  },
+  bentoRow: {
+    flexDirection: 'row',
+    gap: DesignTokens.spacing.md,
+  },
+  smallBento: {
+    flex: 1,
+    padding: DesignTokens.spacing.md,
+    alignItems: 'center',
+  },
+  bentoLabel: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: DesignTokens.colors.textSecondary,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+    marginBottom: 4,
+  },
+  bentoMainValue: {
+    fontSize: 36,
+    fontWeight: '900',
+    color: DesignTokens.colors.textPrimary,
+  },
+  bentoUnit: {
+    fontSize: 14,
+    color: DesignTokens.colors.textTertiary,
+  },
+  bentoValue: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: DesignTokens.colors.textPrimary,
+  },
+  progressBarBg: {
+    height: 6,
+    backgroundColor: DesignTokens.colors.surfaceElevated,
+    borderRadius: 3,
+    marginTop: 12,
+    overflow: 'hidden',
+  },
+  progressBarFill: {
+    height: '100%',
+    backgroundColor: DesignTokens.colors.primary,
+    borderRadius: 3,
+  },
+  section: {
+    paddingHorizontal: DesignTokens.spacing.lg,
+    marginTop: DesignTokens.spacing.lg,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: DesignTokens.spacing.md,
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: DesignTokens.colors.textPrimary,
+    letterSpacing: -0.3,
+  },
+  seeAllText: {
+    fontSize: 14,
+    color: DesignTokens.colors.primary,
+    fontWeight: '600',
+  },
+  emptyPlanCard: {
+    alignItems: 'center',
+    padding: DesignTokens.spacing.xl,
+    gap: 8,
+  },
+  emptyPlanTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: DesignTokens.colors.textPrimary,
+    marginTop: 8,
+  },
+  emptyPlanDesc: {
+    fontSize: 14,
+    color: DesignTokens.colors.textSecondary,
+    textAlign: 'center',
+    lineHeight: 20,
+    marginBottom: 16,
+  },
+  generateButton: {
+    width: '100%',
+  }
+})

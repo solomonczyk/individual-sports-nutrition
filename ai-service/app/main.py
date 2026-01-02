@@ -4,6 +4,7 @@ from app.config import get_settings
 from app.routers.health import router as health_router
 from app.routers import recommendations
 from app.routers import meal_plan as meal_plan_router
+from app.routers import advice as advice_router
 from app.utils.logger import logger
 from app.utils.ml_config import get_ml_config
 
@@ -26,6 +27,7 @@ app.add_middleware(
 app.include_router(health_router)
 app.include_router(recommendations.router)
 app.include_router(meal_plan_router.router)
+app.include_router(advice_router.router)
 
 
 @app.on_event("startup")

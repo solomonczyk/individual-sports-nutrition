@@ -1,28 +1,30 @@
 import React from 'react'
-import { View, Text, Dimensions } from 'react-native'
+import { View, Text, StyleSheet, Dimensions } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { StatusBar } from 'expo-status-bar'
 import { useRouter } from 'expo-router'
-import { Button } from '../../src/components/ui/Button'
+import { ModernButton } from '../../src/components/ui/ModernButton'
+import { DesignTokens } from '../../src/constants/DesignTokens'
 import i18n from '../../src/i18n'
+import { Ionicons } from '@expo/vector-icons'
 
 const { width } = Dimensions.get('window')
 
 const introSteps = [
   {
-    title: 'Персонализованный подход',
-    description: 'Мы учитываем ваше здоровье, цели и противопоказания',
-    emoji: '🎯',
+    title: 'Personalized Evolution',
+    description: 'We adapt to your unique health profile, goals, and needs.',
+    icon: 'fitness-outline',
   },
   {
-    title: 'Локальные продукты',
-    description: 'Рекомендации на основе доступных продуктов в Сербии',
-    emoji: '🛒',
+    title: 'Local Intelligence',
+    description: 'Recommendations optimized for products found in your region.',
+    icon: 'cart-outline',
   },
   {
-    title: 'Полный контроль',
-    description: 'Отслеживайте прогресс и корректируйте план питания',
-    emoji: '📊',
+    title: 'Total Mastery',
+    description: 'Track every metric and adapt your plan in real-time.',
+    icon: 'stats-chart-outline',
   },
 ]
 
@@ -45,45 +47,117 @@ export default function IntroScreen() {
   const step = introSteps[currentStep]
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
-      <StatusBar style="dark" />
-      <View className="flex-1 px-6">
-        {/* Progress dots */}
-        <View className="flex-row justify-center pt-8 pb-4">
+    <SafeAreaView style={styles.container}>
+      <StatusBar style="light" />
+      <View style={styles.content}>
+        {/* Progress indicators at top */}
+        <View style={styles.progressContainer}>
           {introSteps.map((_, index) => (
             <View
               key={index}
-              className={`
-                h-2 rounded-full mx-1
-                ${index === currentStep ? 'bg-blue-600 w-8' : 'bg-gray-300 w-2'}
-              `}
+              style={[
+                styles.progressDot,
+                index === currentStep ? styles.progressActive : styles.progressInactive
+              ]}
             />
           ))}
         </View>
 
         {/* Content */}
-        <View className="flex-1 justify-center items-center">
-          <Text className="text-8xl mb-8">{step.emoji}</Text>
-          <Text className="text-2xl font-bold text-gray-900 text-center mb-4">
+        <View style={styles.main}>
+          <View style={styles.iconCircle}>
+            <Ionicons
+              name={step.icon as any}
+              size={80}
+              color={DesignTokens.colors.primary}
+            />
+          </View>
+
+          <Text style={styles.title}>
             {step.title}
           </Text>
-          <Text className="text-lg text-gray-600 text-center px-4">
+          <Text style={styles.description}>
             {step.description}
           </Text>
         </View>
 
         {/* Buttons */}
-        <View className="pb-8">
-          <Button title={i18n.t('next')} onPress={handleNext} />
-          <Button
+        <View style={styles.footer}>
+          <ModernButton title={i18n.t('next')} onPress={handleNext} />
+          <ModernButton
             title={i18n.t('skip')}
             onPress={handleSkip}
             variant="outline"
-            className="mt-4"
+            style={styles.skipButton}
           />
         </View>
       </View>
     </SafeAreaView>
   )
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: DesignTokens.colors.background,
+  },
+  content: {
+    flex: 1,
+    paddingHorizontal: DesignTokens.spacing.xl,
+  },
+  progressContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginTop: 24,
+    gap: 8,
+  },
+  progressDot: {
+    height: 4,
+    borderRadius: 2,
+  },
+  progressActive: {
+    width: 32,
+    backgroundColor: DesignTokens.colors.primary,
+  },
+  progressInactive: {
+    width: 12,
+    backgroundColor: DesignTokens.colors.surfaceElevated,
+  },
+  main: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  iconCircle: {
+    width: 160,
+    height: 160,
+    borderRadius: 80,
+    backgroundColor: `${DesignTokens.colors.primary}10`,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 40,
+    borderWidth: 1,
+    borderColor: `${DesignTokens.colors.primary}20`,
+  },
+  title: {
+    fontSize: 32,
+    fontWeight: '800',
+    color: DesignTokens.colors.textPrimary,
+    textAlign: 'center',
+    letterSpacing: -0.5,
+  },
+  description: {
+    fontSize: 18,
+    color: DesignTokens.colors.textSecondary,
+    textAlign: 'center',
+    marginTop: 16,
+    lineHeight: 28,
+  },
+  footer: {
+    paddingBottom: DesignTokens.spacing.lg,
+  },
+  skipButton: {
+    marginTop: 16,
+  }
+})
 

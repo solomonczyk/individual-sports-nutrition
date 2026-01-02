@@ -21,6 +21,7 @@ export interface Brand {
   name: string
   origin_country: string | null
   verified: boolean
+  premium?: boolean
   created_at: Date
   updated_at: Date
 }

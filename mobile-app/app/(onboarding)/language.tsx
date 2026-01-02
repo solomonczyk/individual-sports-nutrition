@@ -1,12 +1,15 @@
 import React from 'react'
-import { View, Text, TouchableOpacity, ScrollView } from 'react-native'
+import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { StatusBar } from 'expo-status-bar'
-import { Link, useRouter } from 'expo-router'
+import { useRouter } from 'expo-router'
 import { useLanguageStore } from '../../src/store/language-store'
 import { Language } from '../../src/i18n'
-import { Button } from '../../src/components/ui/Button'
+import { ModernButton } from '../../src/components/ui/ModernButton'
+import { DesignTokens } from '../../src/constants/DesignTokens'
+import { GlassCard } from '../../src/components/ui/GlassCard'
 import i18n from '../../src/i18n'
+import { Ionicons } from '@expo/vector-icons'
 
 const languages: Array<{ code: Language; name: string; nativeName: string }> = [
   { code: 'sr', name: 'Serbian', nativeName: 'Српски' },
@@ -14,7 +17,7 @@ const languages: Array<{ code: Language; name: string; nativeName: string }> = [
   { code: 'ro', name: 'Romanian', nativeName: 'Română' },
   { code: 'en', name: 'English', nativeName: 'English' },
   { code: 'ru', name: 'Russian', nativeName: 'Русский' },
-  { code: 'ua', name: 'Ukrainian', nativeName: 'Українська' },
+  { code: 'uk', name: 'Ukrainian', nativeName: 'Українська' },
 ]
 
 export default function LanguageScreen() {
@@ -31,48 +34,120 @@ export default function LanguageScreen() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
-      <StatusBar style="dark" />
-      <ScrollView className="flex-1 px-6">
-        <View className="py-8">
-          <Text className="text-2xl font-bold text-gray-900 mb-2">
+    <SafeAreaView style={styles.container}>
+      <StatusBar style="light" />
+      <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
+        <View style={styles.header}>
+          <Text style={styles.title}>
             {i18n.t('select_language')}
           </Text>
-          <Text className="text-gray-600 mb-8">
+          <Text style={styles.subtitle}>
             Одаберите језик / Select your language
           </Text>
+        </View>
 
-          <View className="space-y-3">
-            {languages.map((lang) => (
+        <View style={styles.list}>
+          {languages.map((lang) => {
+            const isSelected = language === lang.code;
+            return (
               <TouchableOpacity
                 key={lang.code}
                 onPress={() => handleLanguageSelect(lang.code)}
-                className={`
-                  border-2 rounded-lg p-4 flex-row items-center justify-between
-                  ${language === lang.code ? 'border-blue-600 bg-blue-50' : 'border-gray-200'}
-                `}
+                activeOpacity={0.7}
               >
-                <View>
-                  <Text className="text-lg font-semibold text-gray-900">
-                    {lang.nativeName}
-                  </Text>
-                  <Text className="text-sm text-gray-500">{lang.name}</Text>
-                </View>
-                {language === lang.code && (
-                  <View className="w-6 h-6 bg-blue-600 rounded-full items-center justify-center">
-                    <Text className="text-white text-xs">✓</Text>
+                <GlassCard style={StyleSheet.flatten([
+                  styles.card,
+                  isSelected && styles.selectedCard
+                ])}>
+                  <View>
+                    <Text style={[styles.langNative, isSelected && styles.selectedText]}>
+                      {lang.nativeName}
+                    </Text>
+                    <Text style={styles.langName}>{lang.name}</Text>
                   </View>
-                )}
+                  {isSelected && (
+                    <View style={styles.checkCircle}>
+                      <Ionicons name="checkmark" size={16} color="white" />
+                    </View>
+                  )}
+                </GlassCard>
               </TouchableOpacity>
-            ))}
-          </View>
+            );
+          })}
         </View>
       </ScrollView>
 
-      <View className="px-6 pb-8 pt-4 border-t border-gray-200">
-        <Button title={i18n.t('next')} onPress={handleNext} />
+      <View style={styles.footer}>
+        <ModernButton title={i18n.t('next')} onPress={handleNext} />
       </View>
     </SafeAreaView>
   )
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: DesignTokens.colors.background,
+  },
+  scroll: {
+    flex: 1,
+  },
+  scrollContent: {
+    padding: DesignTokens.spacing.lg,
+  },
+  header: {
+    marginTop: 24,
+    marginBottom: 32,
+  },
+  title: {
+    fontSize: 32,
+    fontWeight: '800',
+    color: DesignTokens.colors.textPrimary,
+    letterSpacing: -0.5,
+  },
+  subtitle: {
+    fontSize: 16,
+    color: DesignTokens.colors.textSecondary,
+    marginTop: 8,
+  },
+  list: {
+    gap: 12,
+  },
+  card: {
+    padding: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  selectedCard: {
+    borderColor: DesignTokens.colors.primary,
+    backgroundColor: `${DesignTokens.colors.primary}10`,
+  },
+  langNative: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: DesignTokens.colors.textPrimary,
+  },
+  selectedText: {
+    color: DesignTokens.colors.primary,
+  },
+  langName: {
+    fontSize: 14,
+    color: DesignTokens.colors.textSecondary,
+    marginTop: 2,
+  },
+  checkCircle: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: DesignTokens.colors.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  footer: {
+    padding: DesignTokens.spacing.lg,
+    borderTopWidth: 1,
+    borderTopColor: DesignTokens.colors.glassBorder,
+  }
+})
 
