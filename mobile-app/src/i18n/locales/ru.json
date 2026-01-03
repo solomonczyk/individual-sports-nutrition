@@ -128,5 +128,7 @@
   "error_saving_progress": "Ошибка сохранения прогресса",
   "current_weight": "Текущий вес",
   "weight_trend": "Динамика веса",
-  "recent_entries": "Последние записи"
+  "recent_entries": "Последние записи",
+  "price_alerts": "Уведомления о ценах",
+  "price_alerts_desc": "Узнавайте о снижении цен"
 }

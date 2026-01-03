@@ -128,5 +128,7 @@
   "error_saving_progress": "Error saving progress",
   "current_weight": "Current Weight",
   "weight_trend": "Weight Trend",
-  "recent_entries": "Recent Entries"
+  "recent_entries": "Recent Entries",
+  "price_alerts": "Price Alerts",
+  "price_alerts_desc": "Get notified when prices drop"
 }

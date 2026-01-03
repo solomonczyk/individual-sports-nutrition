@@ -1,276 +1,153 @@
-import React from 'react'
-import { View, Text, ScrollView, TouchableOpacity, Switch, Alert } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
-import { StatusBar } from 'expo-status-bar'
-import { useRouter } from 'expo-router'
-import { Ionicons } from '@expo/vector-icons'
-import { useAuthStore } from '../../src/store/auth-store'
-import { useLanguageStore } from '../../src/store/language-store'
-import { useQuery } from '@tanstack/react-query'
-import { healthProfileService } from '../../src/services/health-profile-service'
-import i18n from '../../src/i18n'
+import React from 'react';
+import { View, Text, ScrollView, TouchableOpacity, Alert, StyleSheet } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { StatusBar } from 'expo-status-bar';
+import { useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
+import { useQuery } from '@tanstack/react-query';
+import { useAuthStore } from '../../src/store/auth-store';
+import { useLanguageStore } from '../../src/store/language-store';
+import { useNotificationStore } from '../../src/store/notification-store';
+import { healthProfileService } from '../../src/services/health-profile-service';
+import { SettingsSection, SettingsToggle, SettingsRow } from '../../src/components/settings';
+import { GlassCard, Avatar } from '../../src/components/ui';
+import { DesignTokens } from '../../src/constants/DesignTokens';
+import i18n from '../../src/i18n';
 
 export default function SettingsScreen() {
-  const router = useRouter()
-  const { user, logout } = useAuthStore()
-  const { language, setLanguage } = useLanguageStore()
+  const router = useRouter();
+  const { user, logout } = useAuthStore();
+  const { language } = useLanguageStore();
+  const { settings, toggleSetting } = useNotificationStore();
 
-  // Fetch health profile for display
   const { data: healthProfileData } = useQuery({
     queryKey: ['healthProfile'],
     queryFn: () => healthProfileService.get(),
     enabled: !!user,
-  })
+  });
 
-  const healthProfile = healthProfileData?.data
+  const healthProfile = healthProfileData?.data;
 
   const handleLogout = () => {
-    Alert.alert(
-      i18n.t('logout'),
-      i18n.t('logout_confirm'),
-      [
-        { text: i18n.t('cancel'), style: 'cancel' },
-        {
-          text: i18n.t('logout'),
-          style: 'destructive',
-          onPress: () => {
-            logout()
-            router.replace('/(onboarding)/welcome')
-          },
-        },
-      ]
-    )
-  }
-
-  const languages: Array<{ code: string; name: string; nativeName: string }> = [
-    { code: 'sr', name: 'Serbian', nativeName: 'Српски' },
-    { code: 'hu', name: 'Hungarian', nativeName: 'Magyar' },
-    { code: 'ro', name: 'Romanian', nativeName: 'Română' },
-    { code: 'en', name: 'English', nativeName: 'English' },
-    { code: 'ru', name: 'Russian', nativeName: 'Русский' },
-    { code: 'ua', name: 'Ukrainian', nativeName: 'Українська' },
-  ]
+    Alert.alert(i18n.t('logout'), i18n.t('logout_confirm'), [
+      { text: i18n.t('cancel'), style: 'cancel' },
+      { text: i18n.t('logout'), style: 'destructive', onPress: () => { logout(); router.replace('/(onboarding)/welcome'); } },
+    ]);
+  };
 
   const getGoalLabel = (goal?: string) => {
-    const goals: Record<string, string> = {
-      mass: i18n.t('mass_gain'),
-      cut: i18n.t('weight_loss'),
-      maintain: i18n.t('maintenance'),
-      endurance: i18n.t('endurance'),
-    }
-    return goal ? goals[goal] || goal : i18n.t('not_set')
-  }
+    const goals: Record<string, string> = { mass: i18n.t('mass_gain'), cut: i18n.t('weight_loss'), maintain: i18n.t('maintenance'), endurance: i18n.t('endurance') };
+    return goal ? goals[goal] || goal : i18n.t('not_set');
+  };
 
-  const getActivityLabel = (activity?: string) => {
-    const activities: Record<string, string> = {
-      low: i18n.t('low'),
-      moderate: i18n.t('moderate'),
-      high: i18n.t('high'),
-      very_high: i18n.t('very_high'),
-    }
-    return activity ? activities[activity] || activity : i18n.t('not_set')
-  }
+  const getLanguageName = () => {
+    const langs: Record<string, string> = { sr: 'Српски', hu: 'Magyar', ro: 'Română', en: 'English', ru: 'Русский', uk: 'Українська' };
+    return langs[language] || 'English';
+  };
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
-      <StatusBar style="dark" />
-      <ScrollView className="flex-1">
-        <View className="px-6 py-4">
-          <Text className="text-3xl font-bold text-gray-900 mb-8">
-            {i18n.t('tab_settings')}
-          </Text>
-
-          {/* Profile Section */}
-          <View className="mb-6">
-            <Text className="text-lg font-semibold text-gray-900 mb-4">
-              {i18n.t('tab_profile')}
-            </Text>
-            <View className="bg-gray-50 rounded-lg overflow-hidden">
-              {/* Edit Health Profile */}
-              <TouchableOpacity
-                onPress={() => router.push('/health-profile/edit')}
-                className="flex-row items-center justify-between px-4 py-4 border-b border-gray-200"
-              >
-                <View className="flex-1">
-                  <Text className="text-base font-semibold text-gray-900">
-                    {i18n.t('health_profile')}
-                  </Text>
-                  <Text className="text-sm text-gray-500 mt-1">
-                    {healthProfile
-                      ? `${healthProfile.age} ${i18n.t('years')}, ${getGoalLabel(healthProfile.goal)}`
-                      : i18n.t('not_set')}
-                  </Text>
-                </View>
-                <Ionicons name="chevron-forward" size={20} color="#6B7280" />
-              </TouchableOpacity>
-
-              {/* Current Goal */}
-              {healthProfile && (
-                <View className="px-4 py-3 border-b border-gray-200">
-                  <Text className="text-sm text-gray-500 mb-1">{i18n.t('current_goal')}</Text>
-                  <Text className="text-base font-semibold text-gray-900">
-                    {getGoalLabel(healthProfile.goal)}
-                  </Text>
-                </View>
-              )}
-
-              {/* Activity Level */}
-              {healthProfile && (
-                <View className="px-4 py-3 border-b border-gray-200">
-                  <Text className="text-sm text-gray-500 mb-1">{i18n.t('activity_level')}</Text>
-                  <Text className="text-base font-semibold text-gray-900">
-                    {getActivityLabel(healthProfile.activity_level)}
-                  </Text>
-                </View>
-              )}
-
-              {/* Weight & Height */}
-              {healthProfile && (
-                <View className="px-4 py-3">
-                  <View className="flex-row justify-between">
-                    <View className="flex-1">
-                      <Text className="text-sm text-gray-500 mb-1">{i18n.t('weight')}</Text>
-                      <Text className="text-base font-semibold text-gray-900">
-                        {healthProfile.weight} kg
-                      </Text>
-                    </View>
-                    <View className="flex-1 ml-4">
-                      <Text className="text-sm text-gray-500 mb-1">{i18n.t('height')}</Text>
-                      <Text className="text-base font-semibold text-gray-900">
-                        {healthProfile.height} cm
-                      </Text>
-                    </View>
-                  </View>
-                </View>
-              )}
-            </View>
-          </View>
-
-          {/* Preferences Section */}
-          <View className="mb-6">
-            <Text className="text-lg font-semibold text-gray-900 mb-4">
-              {i18n.t('preferences')}
-            </Text>
-            <View className="bg-gray-50 rounded-lg overflow-hidden">
-              {/* Language Selection */}
-              <View>
-                <View className="px-4 py-3 border-b border-gray-200">
-                  <Text className="text-base font-semibold text-gray-900 mb-3">
-                    {i18n.t('language', { defaultValue: 'Language' })}
-                  </Text>
-                </View>
-                {languages.map((lang, index) => (
-                  <TouchableOpacity
-                    key={lang.code}
-                    onPress={() => {
-                      setLanguage(lang.code as any)
-                      i18n.locale = lang.code
-                    }}
-                    className={`
-                      flex-row items-center justify-between px-4 py-4
-                      ${index < languages.length - 1 ? 'border-b border-gray-200' : ''}
-                      ${language === lang.code ? 'bg-blue-50' : ''}
-                    `}
-                  >
-                    <View>
-                      <Text className="text-base font-semibold text-gray-900">
-                        {lang.nativeName}
-                      </Text>
-                      <Text className="text-sm text-gray-500">{lang.name}</Text>
-                    </View>
-                    {language === lang.code && (
-                      <Ionicons name="checkmark" size={24} color="#2563eb" />
-                    )}
-                  </TouchableOpacity>
-                ))}
-              </View>
-            </View>
-          </View>
-
-          {/* Notifications Section */}
-          <View className="mb-6">
-            <Text className="text-lg font-semibold text-gray-900 mb-4">
-              {i18n.t('notifications')}
-            </Text>
-            <View className="bg-gray-50 rounded-lg overflow-hidden">
-              <View className="flex-row items-center justify-between px-4 py-4 border-b border-gray-200">
-                <View className="flex-1">
-                  <Text className="text-base font-semibold text-gray-900">
-                    {i18n.t('meal_reminders')}
-                  </Text>
-                  <Text className="text-sm text-gray-500 mt-1">
-                    {i18n.t('meal_reminders_desc')}
-                  </Text>
-                </View>
-                <Switch
-                  value={false} // TODO: Implement notifications settings
-                  onValueChange={() => {
-                    // TODO: Save notification preference
-                  }}
-                  trackColor={{ false: '#D1D5DB', true: '#3B82F6' }}
-                  thumbColor="#FFFFFF"
-                />
-              </View>
-              <View className="flex-row items-center justify-between px-4 py-4 border-b border-gray-200">
-                <View className="flex-1">
-                  <Text className="text-base font-semibold text-gray-900">
-                    {i18n.t('supplement_reminders')}
-                  </Text>
-                  <Text className="text-sm text-gray-500 mt-1">
-                    {i18n.t('supplement_reminders_desc')}
-                  </Text>
-                </View>
-                <Switch
-                  value={false} // TODO: Implement notifications settings
-                  onValueChange={() => {
-                    // TODO: Save notification preference
-                  }}
-                  trackColor={{ false: '#D1D5DB', true: '#3B82F6' }}
-                  thumbColor="#FFFFFF"
-                />
-              </View>
-              <View className="flex-row items-center justify-between px-4 py-4">
-                <View className="flex-1">
-                  <Text className="text-base font-semibold text-gray-900">
-                    {i18n.t('progress_updates')}
-                  </Text>
-                  <Text className="text-sm text-gray-500 mt-1">
-                    {i18n.t('progress_updates_desc')}
-                  </Text>
-                </View>
-                <Switch
-                  value={false} // TODO: Implement notifications settings
-                  onValueChange={() => {
-                    // TODO: Save notification preference
-                  }}
-                  trackColor={{ false: '#D1D5DB', true: '#3B82F6' }}
-                  thumbColor="#FFFFFF"
-                />
-              </View>
-            </View>
-          </View>
-
-          {/* Account Section */}
-          <View className="mb-6">
-            <Text className="text-lg font-semibold text-gray-900 mb-4">
-              {i18n.t('account')}
-            </Text>
-            <View className="bg-gray-50 rounded-lg p-4">
-              <Text className="text-gray-600 mb-1">Email</Text>
-              <Text className="text-base font-semibold text-gray-900">{user?.email}</Text>
-            </View>
-          </View>
-
-          {/* Logout */}
-          <TouchableOpacity
-            onPress={handleLogout}
-            className="bg-red-50 border border-red-200 rounded-lg p-4 flex-row items-center justify-center mb-8"
-          >
-            <Ionicons name="log-out-outline" size={20} color="#dc2626" />
-            <Text className="text-red-600 font-semibold ml-2">{i18n.t('logout')}</Text>
-          </TouchableOpacity>
+    <SafeAreaView style={styles.container}>
+      <StatusBar style="light" />
+      <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        {/* Header */}
+        <View style={styles.header}>
+          <Text style={styles.title}>{i18n.t('tab_settings')}</Text>
         </View>
+
+        {/* Profile Card */}
+        <GlassCard style={styles.profileCard}>
+          <Avatar name={user?.email} size="lg" />
+          <View style={styles.profileInfo}>
+            <Text style={styles.profileEmail}>{user?.email}</Text>
+            <Text style={styles.profileGoal}>{getGoalLabel(healthProfile?.goal)}</Text>
+          </View>
+          <TouchableOpacity style={styles.editButton} onPress={() => router.push('/health-profile/edit')}>
+            <Ionicons name="pencil" size={18} color={DesignTokens.colors.primary} />
+          </TouchableOpacity>
+        </GlassCard>
+
+        {/* Profile Section */}
+        <SettingsSection title={i18n.t('tab_profile')}>
+          <SettingsRow
+            icon="body"
+            title={i18n.t('health_profile')}
+            value={healthProfile ? `${healthProfile.age} ${i18n.t('years')}, ${healthProfile.weight} kg` : i18n.t('not_set')}
+            onPress={() => router.push('/health-profile/edit')}
+            iconColor={DesignTokens.colors.primary}
+          />
+          <SettingsRow
+            icon="language"
+            title={i18n.t('language')}
+            value={getLanguageName()}
+            onPress={() => router.push('/(onboarding)/language')}
+            iconColor={DesignTokens.colors.secondary}
+            isLast
+          />
+        </SettingsSection>
+
+        {/* Notifications Section */}
+        <SettingsSection title={i18n.t('notifications')}>
+          <SettingsToggle
+            icon="restaurant"
+            title={i18n.t('meal_reminders')}
+            description={i18n.t('meal_reminders_desc')}
+            value={settings.mealReminders}
+            onValueChange={() => toggleSetting('mealReminders')}
+            iconColor={DesignTokens.colors.accent}
+          />
+          <SettingsToggle
+            icon="medical"
+            title={i18n.t('supplement_reminders')}
+            description={i18n.t('supplement_reminders_desc')}
+            value={settings.supplementReminders}
+            onValueChange={() => toggleSetting('supplementReminders')}
+            iconColor={DesignTokens.colors.warning}
+          />
+          <SettingsToggle
+            icon="trending-up"
+            title={i18n.t('progress_updates')}
+            description={i18n.t('progress_updates_desc')}
+            value={settings.progressUpdates}
+            onValueChange={() => toggleSetting('progressUpdates')}
+            iconColor={DesignTokens.colors.success}
+          />
+          <SettingsToggle
+            icon="pricetag"
+            title={i18n.t('price_alerts')}
+            description={i18n.t('price_alerts_desc')}
+            value={settings.priceAlerts}
+            onValueChange={() => toggleSetting('priceAlerts')}
+            iconColor={DesignTokens.colors.error}
+            isLast
+          />
+        </SettingsSection>
+
+        {/* Logout */}
+        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+          <Ionicons name="log-out-outline" size={20} color={DesignTokens.colors.error} />
+          <Text style={styles.logoutText}>{i18n.t('logout')}</Text>
+        </TouchableOpacity>
+
+        {/* Version */}
+        <Text style={styles.version}>v1.0.0</Text>
       </ScrollView>
     </SafeAreaView>
-  )
+  );
 }
+
+
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: DesignTokens.colors.background },
+  scroll: { flex: 1 },
+  scrollContent: { paddingHorizontal: 20, paddingBottom: 120 },
+  header: { paddingTop: 16, paddingBottom: 8 },
+  title: { fontSize: 32, fontWeight: '800', color: DesignTokens.colors.textPrimary, letterSpacing: -0.5 },
+  profileCard: { flexDirection: 'row', alignItems: 'center', padding: 16, marginTop: 16, marginBottom: 24 },
+  profileInfo: { flex: 1, marginLeft: 16 },
+  profileEmail: { fontSize: 16, fontWeight: '600', color: DesignTokens.colors.textPrimary },
+  profileGoal: { fontSize: 14, color: DesignTokens.colors.textSecondary, marginTop: 2 },
+  editButton: { width: 40, height: 40, borderRadius: 20, backgroundColor: `${DesignTokens.colors.primary}15`, justifyContent: 'center', alignItems: 'center' },
+  logoutButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', padding: 16, borderRadius: 16, backgroundColor: `${DesignTokens.colors.error}10`, borderWidth: 1, borderColor: `${DesignTokens.colors.error}30`, marginTop: 8 },
+  logoutText: { fontSize: 16, fontWeight: '600', color: DesignTokens.colors.error, marginLeft: 8 },
+  version: { textAlign: 'center', fontSize: 12, color: DesignTokens.colors.textTertiary, marginTop: 24 },
+});
