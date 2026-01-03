@@ -1,0 +1,127 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  test-mobile:
+    name: Test Mobile App
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: mobile-app/package-lock.json
+      
+      - name: Install dependencies
+        working-directory: mobile-app
+        run: npm ci
+      
+      - name: Run linter
+        working-directory: mobile-app
+        run: npm run lint
+      
+      - name: Run tests
+        working-directory: mobile-app
+        run: npm run test:ci
+      
+      - name: Upload coverage
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./mobile-app/coverage/lcov.info
+          flags: mobile
+
+  test-backend:
+    name: Test Backend API
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: test_db
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+    
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: backend-api/package-lock.json
+      
+      - name: Install dependencies
+        working-directory: backend-api
+        run: npm ci
+      
+      - name: Run linter
+        working-directory: backend-api
+        run: npm run lint
+      
+      - name: Run tests
+        working-directory: backend-api
+        run: npm run test:ci
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db
+      
+      - name: Upload coverage
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./backend-api/coverage/lcov.info
+          flags: backend
+
+  test-admin:
+    name: Test Admin Panel
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: admin-panel/package-lock.json
+      
+      - name: Install dependencies
+        working-directory: admin-panel
+        run: npm ci
+      
+      - name: Run linter
+        working-directory: admin-panel
+        run: npm run lint
+      
+      - name: Build
+        working-directory: admin-panel
+        run: npm run build
+
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Run npm audit
+        run: |
+          cd mobile-app && npm audit --audit-level=moderate
+          cd ../backend-api && npm audit --audit-level=moderate
+          cd ../admin-panel && npm audit --audit-level=moderate
