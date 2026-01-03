@@ -116,5 +116,17 @@
   "search_products": "Search products...",
   "catalog": "Catalog",
   "no_products": "No products found",
-  "try_different_filters": "Try different filters or search terms"
+  "try_different_filters": "Try different filters or search terms",
+  "add_progress": "Add Progress",
+  "body_fat": "Body Fat",
+  "notes": "Notes",
+  "notes_placeholder": "How are you feeling today?",
+  "save": "Save",
+  "invalid_weight": "Please enter a valid weight (30-300 kg)",
+  "invalid_body_fat": "Please enter a valid body fat percentage (1-60%)",
+  "progress_saved": "Progress saved successfully!",
+  "error_saving_progress": "Error saving progress",
+  "current_weight": "Current Weight",
+  "weight_trend": "Weight Trend",
+  "recent_entries": "Recent Entries"
 }
