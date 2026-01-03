@@ -10,6 +10,7 @@ import mealPlanRouter from './meal-plan'
 import progressRouter from './progress'
 import adviceRouter from './advice'
 import adminRouter from './admin'
+import serbianCuisineRouter from './serbian-cuisine'
 
 const router = Router()
 
@@ -32,6 +33,7 @@ router.use('/meal-plan', mealPlanRouter)
 router.use('/progress', progressRouter)
 router.use('/advice', adviceRouter)
 router.use('/admin', adminRouter)
+router.use('/serbian-cuisine', serbianCuisineRouter)
 
 export default router
 

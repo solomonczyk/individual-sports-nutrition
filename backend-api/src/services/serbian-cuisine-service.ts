@@ -1,206 +1,275 @@
-/**
- * Сервис для работы с сербской кухней и локальными продуктами
- * Service for Serbian cuisine and local products
- */
+import { pool } from '../config/database';
 
-export interface SerbianMealTime {
-  breakfast: string // обычно 7:00-9:00
-  snack1: string // обычно 10:00-11:00
-  lunch: string // обычно 13:00-15:00 (главный прием пищи)
-  snack2: string // обычно 16:00-17:00
-  dinner: string // обычно 19:00-21:00
+export interface SerbianDish {
+  id: string;
+  name: string;
+  name_sr: string;
+  name_en: string;
+  description?: string;
+  description_sr?: string;
+  description_en?: string;
+  category: 'main' | 'appetizer' | 'dessert' | 'snack' | 'side';
+  calories_per_100g: number;
+  protein_per_100g: number;
+  carbs_per_100g: number;
+  fat_per_100g: number;
+  fiber_per_100g?: number;
+  typical_serving_size?: number;
+  is_popular: boolean;
+  image_url?: string;
+  ingredients?: DishIngredient[];
+}
+
+export interface DishIngredient {
+  ingredient_name: string;
+  ingredient_name_sr: string;
+  is_allergen: boolean;
+  allergen_type?: string;
+}
+
+export interface UserFoodPreferences {
+  user_id: string;
+  prefers_local_cuisine: boolean;
+  favorite_dishes: string[];
+  avoided_ingredients: string[];
+  dietary_restrictions: string[];
+}
+
+export interface NutritionRecommendation {
+  dish: SerbianDish;
+  recommended_serving: number;
+  fits_macros: boolean;
+  reason: string;
+  reason_sr: string;
 }
 
 export class SerbianCuisineService {
-  /**
-   * Получить стандартное сербское расписание приемов пищи
-   */
-  getDefaultMealTimes(): SerbianMealTime {
-    return {
-      breakfast: '08:00',
-      snack1: '10:30',
-      lunch: '14:00', // Главный прием пищи в Сербии обычно в обеденное время
-      snack2: '16:30',
-      dinner: '20:00',
+  // Get all Serbian dishes
+  async getAllDishes(language: string = 'sr'): Promise<SerbianDish[]> {
+    const result = await pool.query(`
+      SELECT 
+        d.*,
+        COALESCE(
+          json_agg(
+            json_build_object(
+              'ingredient_name', i.ingredient_name,
+              'ingredient_name_sr', i.ingredient_name_sr,
+              'is_allergen', i.is_allergen,
+              'allergen_type', i.allergen_type
+            )
+          ) FILTER (WHERE i.id IS NOT NULL),
+          '[]'
+        ) as ingredients
+      FROM serbian_dishes d
+      LEFT JOIN serbian_dish_ingredients i ON d.id = i.dish_id
+      GROUP BY d.id
+      ORDER BY d.is_popular DESC, d.name
+    `);
+
+    return result.rows;
+  }
+
+  // Get popular dishes
+  async getPopularDishes(limit: number = 10): Promise<SerbianDish[]> {
+    const result = await pool.query(`
+      SELECT 
+        d.*,
+        COALESCE(
+          json_agg(
+            json_build_object(
+              'ingredient_name', i.ingredient_name,
+              'ingredient_name_sr', i.ingredient_name_sr,
+              'is_allergen', i.is_allergen,
+              'allergen_type', i.allergen_type
+            )
+          ) FILTER (WHERE i.id IS NOT NULL),
+          '[]'
+        ) as ingredients
+      FROM serbian_dishes d
+      LEFT JOIN serbian_dish_ingredients i ON d.id = i.dish_id
+      WHERE d.is_popular = true
+      GROUP BY d.id
+      ORDER BY d.name
+      LIMIT $1
+    `, [limit]);
+
+    return result.rows;
+  }
+
+  // Get dish by ID
+  async getDishById(dishId: string): Promise<SerbianDish | null> {
+    const result = await pool.query(`
+      SELECT 
+        d.*,
+        COALESCE(
+          json_agg(
+            json_build_object(
+              'ingredient_name', i.ingredient_name,
+              'ingredient_name_sr', i.ingredient_name_sr,
+              'is_allergen', i.is_allergen,
+              'allergen_type', i.allergen_type
+            )
+          ) FILTER (WHERE i.id IS NOT NULL),
+          '[]'
+        ) as ingredients
+      FROM serbian_dishes d
+      LEFT JOIN serbian_dish_ingredients i ON d.id = i.dish_id
+      WHERE d.id = $1
+      GROUP BY d.id
+    `, [dishId]);
+
+    return result.rows[0] || null;
+  }
+
+  // Get user food preferences
+  async getUserPreferences(userId: string): Promise<UserFoodPreferences | null> {
+    const result = await pool.query(`
+      SELECT * FROM user_food_preferences WHERE user_id = $1
+    `, [userId]);
+
+    return result.rows[0] || null;
+  }
+
+  // Update user food preferences
+  async updateUserPreferences(
+    userId: string,
+    preferences: Partial<UserFoodPreferences>
+  ): Promise<UserFoodPreferences> {
+    const existing = await this.getUserPreferences(userId);
+
+    if (existing) {
+      const result = await pool.query(`
+        UPDATE user_food_preferences
+        SET 
+          prefers_local_cuisine = COALESCE($2, prefers_local_cuisine),
+          favorite_dishes = COALESCE($3, favorite_dishes),
+          avoided_ingredients = COALESCE($4, avoided_ingredients),
+          dietary_restrictions = COALESCE($5, dietary_restrictions),
+          updated_at = NOW()
+        WHERE user_id = $1
+        RETURNING *
+      `, [
+        userId,
+        preferences.prefers_local_cuisine,
+        preferences.favorite_dishes,
+        preferences.avoided_ingredients,
+        preferences.dietary_restrictions,
+      ]);
+
+      return result.rows[0];
+    } else {
+      const result = await pool.query(`
+        INSERT INTO user_food_preferences (
+          user_id,
+          prefers_local_cuisine,
+          favorite_dishes,
+          avoided_ingredients,
+          dietary_restrictions
+        ) VALUES ($1, $2, $3, $4, $5)
+        RETURNING *
+      `, [
+        userId,
+        preferences.prefers_local_cuisine ?? true,
+        preferences.favorite_dishes ?? [],
+        preferences.avoided_ingredients ?? [],
+        preferences.dietary_restrictions ?? [],
+      ]);
+
+      return result.rows[0];
     }
   }
 
-  /**
-   * Типичные сербские категории ингредиентов
-   */
-  getSerbianIngredientCategories(): string[] {
-    return [
-      'meat', // meso
-      'dairy', // mlečni proizvodi
-      'vegetable', // povrće
-      'fruit', // voće
-      'grain', // žitarice
-      'legume', // mahunarke
-      'nut', // orašasti plodovi
-      'oil', // ulje
-      'serbian_traditional', // srpsko tradicionalno
-    ]
-  }
+  // Get dish recommendations based on user's nutrition goals
+  async getRecommendationsForUser(
+    userId: string,
+    targetCalories: number,
+    targetProtein: number,
+    targetCarbs: number,
+    targetFat: number
+  ): Promise<NutritionRecommendation[]> {
+    const preferences = await this.getUserPreferences(userId);
+    const dishes = await this.getAllDishes();
 
-  /**
-   * Популярные блюда сербской кухни для планирования питания
-   */
-  getPopularSerbianMeals(): Array<{
-    name_key: string
-    meal_type: 'breakfast' | 'lunch' | 'dinner' | 'snack'
-    cuisine_type: string
-    description: string
-  }> {
-    return [
-      // Завтраки
-      {
-        name_key: 'meal.burek',
-        meal_type: 'breakfast',
-        cuisine_type: 'serbian',
-        description: 'Традиционная сербская выпечка с начинкой',
-      },
-      {
-        name_key: 'meal.gibanica',
-        meal_type: 'breakfast',
-        cuisine_type: 'serbian',
-        description: 'Сербский сырный пирог',
-      },
-      {
-        name_key: 'meal.proja',
-        meal_type: 'breakfast',
-        cuisine_type: 'serbian',
-        description: 'Кукурузный хлеб',
-      },
+    const recommendations: NutritionRecommendation[] = [];
 
-      // Обеды (главные приемы пищи)
-      {
-        name_key: 'meal.cevapi',
-        meal_type: 'lunch',
-        cuisine_type: 'serbian',
-        description: 'Традиционные сербские колбаски с лепиньей и луком',
-      },
-      {
-        name_key: 'meal.pljeskavica',
-        meal_type: 'lunch',
-        cuisine_type: 'serbian',
-        description: 'Сербский бургер с луком и сыром',
-      },
-      {
-        name_key: 'meal.sarma',
-        meal_type: 'lunch',
-        cuisine_type: 'serbian',
-        description: 'Голубцы в кислой капусте',
-      },
-      {
-        name_key: 'meal.prebranac',
-        meal_type: 'lunch',
-        cuisine_type: 'serbian',
-        description: 'Запеченная фасоль',
-      },
-      {
-        name_key: 'meal.musaka',
-        meal_type: 'lunch',
-        cuisine_type: 'balkan',
-        description: 'Мусака (балканское блюдо)',
-      },
+    for (const dish of dishes) {
+      // Skip if user avoids ingredients
+      if (preferences?.avoided_ingredients.length) {
+        const hasAvoidedIngredient = dish.ingredients?.some(ing =>
+          preferences.avoided_ingredients.includes(ing.ingredient_name.toLowerCase())
+        );
+        if (hasAvoidedIngredient) continue;
+      }
 
-      // Ужины
-      {
-        name_key: 'meal.riblja_corba',
-        meal_type: 'dinner',
-        cuisine_type: 'serbian',
-        description: 'Рыбный суп',
-      },
-      {
-        name_key: 'meal.pasulj',
-        meal_type: 'dinner',
-        cuisine_type: 'serbian',
-        description: 'Фасолевый суп',
-      },
-      {
-        name_key: 'meal.kajmak_mljeko',
-        meal_type: 'dinner',
-        cuisine_type: 'serbian',
-        description: 'Традиционное молоко с каймаком',
-      },
-    ]
-  }
+      // Calculate recommended serving size
+      const servingSize = dish.typical_serving_size || 200;
+      const servingCalories = (dish.calories_per_100g * servingSize) / 100;
+      const servingProtein = (dish.protein_per_100g * servingSize) / 100;
+      const servingCarbs = (dish.carbs_per_100g * servingSize) / 100;
+      const servingFat = (dish.fat_per_100g * servingSize) / 100;
 
-  /**
-   * Корректировка распределения калорий для сербских пищевых привычек
-   * В Сербии основной прием пищи обычно в обеденное время (13-15)
-   */
-  adjustMealDistributionForSerbian(
-    calories: number,
-    protein: number,
-    carbs: number,
-    fats: number
-  ) {
-    return {
-      breakfast: {
-        calories: Math.round(calories * 0.20), // 20% - легкий завтрак
-        protein: Math.round(protein * 0.20),
-        carbs: Math.round(carbs * 0.20),
-        fats: Math.round(fats * 0.20),
-      },
-      snack1: {
-        calories: Math.round(calories * 0.10), // 10%
-        protein: Math.round(protein * 0.10),
-        carbs: Math.round(carbs * 0.10),
-        fats: Math.round(fats * 0.10),
-      },
-      lunch: {
-        calories: Math.round(calories * 0.40), // 40% - главный прием пищи
-        protein: Math.round(protein * 0.40),
-        carbs: Math.round(carbs * 0.40),
-        fats: Math.round(fats * 0.40),
-      },
-      snack2: {
-        calories: Math.round(calories * 0.10), // 10%
-        protein: Math.round(protein * 0.10),
-        carbs: Math.round(carbs * 0.10),
-        fats: Math.round(fats * 0.10),
-      },
-      dinner: {
-        calories: Math.round(calories * 0.20), // 20% - легкий ужин
-        protein: Math.round(protein * 0.20),
-        carbs: Math.round(carbs * 0.20),
-        fats: Math.round(fats * 0.20),
-      },
+      // Check if fits macros (within 20% tolerance)
+      const caloriesFit = servingCalories <= targetCalories * 0.4; // Max 40% of daily calories per meal
+      const proteinFit = servingProtein >= targetProtein * 0.25; // At least 25% of daily protein
+      const fitsMacros = caloriesFit && proteinFit;
+
+      let reason = '';
+      let reason_sr = '';
+
+      if (fitsMacros) {
+        reason = `Good protein source (${servingProtein.toFixed(1)}g per serving)`;
+        reason_sr = `Dobar izvor proteina (${servingProtein.toFixed(1)}g po porciji)`;
+      } else if (servingProtein < targetProtein * 0.25) {
+        reason = `Low protein content, consider adding protein supplement`;
+        reason_sr = `Nizak sadržaj proteina, razmislite o dodatku proteina`;
+      } else {
+        reason = `High calorie content, adjust portion size`;
+        reason_sr = `Visok sadržaj kalorija, prilagodite veličinu porcije`;
+      }
+
+      recommendations.push({
+        dish,
+        recommended_serving: servingSize,
+        fits_macros: fitsMacros,
+        reason,
+        reason_sr,
+      });
     }
+
+    // Sort by fitness to macros and popularity
+    recommendations.sort((a, b) => {
+      if (a.fits_macros && !b.fits_macros) return -1;
+      if (!a.fits_macros && b.fits_macros) return 1;
+      if (a.dish.is_popular && !b.dish.is_popular) return -1;
+      if (!a.dish.is_popular && b.dish.is_popular) return 1;
+      return 0;
+    });
+
+    return recommendations.slice(0, 10);
   }
 
-  /**
-   * Проверка, является ли продукт/ингредиент типично сербским
-   */
-  isSerbianIngredient(category: string | null): boolean {
-    if (!category) {
-      return false
-    }
-    const serbianCategories = ['serbian_traditional', 'balkan']
-    return serbianCategories.includes(category.toLowerCase())
+  // Get local brands
+  async getLocalBrands(): Promise<any[]> {
+    const result = await pool.query(`
+      SELECT 
+        b.*,
+        COUNT(p.id) as products_count
+      FROM brands b
+      LEFT JOIN products p ON b.id = p.brand_id
+      WHERE b.is_local = true
+      GROUP BY b.id
+      ORDER BY b.name
+    `);
+
+    return result.rows;
   }
 
-  /**
-   * Получить валюту по умолчанию (RSD - сербский динар)
-   */
-  getDefaultCurrency(): string {
-    return 'RSD'
-  }
-
-  /**
-   * Типичные размеры порций в Сербии (в граммах)
-   */
-  getTypicalSerbianPortionSizes() {
-    return {
-      cevapi: 200, // обычно 5-10 штук
-      pljeskavica: 250,
-      sarma: 200, // обычно 3-4 штуки
-      prebranac: 200,
-      burek: 150,
-      ajvar: 50,
-      kajmak: 50,
-    }
+  // Mark brand as local
+  async markBrandAsLocal(brandId: string, isLocal: boolean = true): Promise<void> {
+    await pool.query(`
+      UPDATE brands
+      SET is_local = $2, country_code = 'RS'
+      WHERE id = $1
+    `, [brandId, isLocal]);
   }
 }
-
