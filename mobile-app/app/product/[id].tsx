@@ -1,204 +1,227 @@
-import React from 'react'
-import { View, Text, ScrollView, TouchableOpacity, Linking } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
-import { StatusBar } from 'expo-status-bar'
-import { useLocalSearchParams, useRouter } from 'expo-router'
-import { useQuery } from '@tanstack/react-query'
-import { Ionicons } from '@expo/vector-icons'
-import { apiClient } from '../../src/services/api-client'
-import { API_ENDPOINTS } from '../../src/config/api'
-import { recommendationsService } from '../../src/services/recommendations-service'
-import { LoadingSpinner } from '../../src/components/ui/LoadingSpinner'
-import { EmptyState } from '../../src/components/ui/EmptyState'
-import { Button } from '../../src/components/ui/Button'
-import { Product } from '../../src/types/product'
+import React from 'react';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Linking } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { StatusBar } from 'expo-status-bar';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useQuery } from '@tanstack/react-query';
+import { Image } from 'expo-image';
+import { Ionicons } from '@expo/vector-icons';
+import { apiClient } from '../../src/services/api-client';
+import { API_ENDPOINTS } from '../../src/config/api';
+import { recommendationsService } from '../../src/services/recommendations-service';
+import { LoadingSpinner, GlassCard, Badge, ModernButton } from '../../src/components/ui';
+import { DesignTokens } from '../../src/constants/DesignTokens';
+import { Product } from '../../src/types/product';
+import i18n from '../../src/i18n';
 
 export default function ProductDetailScreen() {
-  const { id } = useLocalSearchParams<{ id: string }>()
-  const router = useRouter()
+  const { id } = useLocalSearchParams<{ id: string }>();
+  const router = useRouter();
 
-  // Fetch product details
-  const { data: productData, isLoading: productLoading } = useQuery({
+  const { data: productData, isLoading } = useQuery({
     queryKey: ['product', id],
     queryFn: async () => {
-      const response = await apiClient.get<{ success: boolean; data: Product }>(
-        `${API_ENDPOINTS.products}/${id}`
-      )
-      return response
+      const response = await apiClient.get<{ success: boolean; data: Product }>(`${API_ENDPOINTS.products}/${id}`);
+      return response;
     },
     enabled: !!id,
-  })
+  });
 
-  // Fetch compatibility check
   const { data: compatibilityData } = useQuery({
     queryKey: ['productCompatibility', id],
     queryFn: () => recommendationsService.checkCompatibility(id!),
     enabled: !!id,
-  })
+  });
 
-  // Fetch price comparison
-  const { data: pricesData, isLoading: pricesLoading } = useQuery({
+  const { data: pricesData } = useQuery({
     queryKey: ['productPrices', id],
     queryFn: async () => {
-      const response = await apiClient.get(`${API_ENDPOINTS.dosage.products}/${id}/prices`)
-      return response
+      const response = await apiClient.get(`${API_ENDPOINTS.dosage.products}/${id}/prices`);
+      return response;
     },
     enabled: !!id,
-  })
+  });
 
-  const product = productData?.data
-  const compatibility = compatibilityData?.data
-  const prices = pricesData?.data
+  const product = productData?.data;
+  const compatibility = compatibilityData?.data;
+  const prices = pricesData?.data;
 
-  if (productLoading) {
+  if (isLoading) {
     return (
-      <SafeAreaView className="flex-1 bg-white">
-        <StatusBar style="dark" />
-        <LoadingSpinner message="Loading product details..." />
+      <SafeAreaView style={styles.container}>
+        <StatusBar style="light" />
+        <LoadingSpinner message="Loading product..." />
       </SafeAreaView>
-    )
+    );
   }
 
   if (!product) {
     return (
-      <SafeAreaView className="flex-1 bg-white">
-        <StatusBar style="dark" />
-        <EmptyState title="Product not found" message="The product you're looking for doesn't exist" />
+      <SafeAreaView style={styles.container}>
+        <StatusBar style="light" />
+        <View style={styles.emptyContainer}>
+          <Ionicons name="alert-circle-outline" size={64} color={DesignTokens.colors.textTertiary} />
+          <Text style={styles.emptyText}>Product not found</Text>
+        </View>
       </SafeAreaView>
-    )
+    );
   }
 
-  const productName = product.name || product.name_key
-  const brandName = product.brand?.name || 'Unknown brand'
-
-  const handleBuyPress = () => {
-    router.push(`/shopping/${id}`)
-  }
+  const productName = product.name || product.name_key;
+  const brandName = product.brand?.name || 'Unknown';
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
-      <StatusBar style="dark" />
+    <SafeAreaView style={styles.container}>
+      <StatusBar style="light" />
       
       {/* Header */}
-      <View className="px-6 py-4 bg-white border-b border-gray-200 flex-row items-center">
-        <TouchableOpacity onPress={() => router.back()} className="mr-4">
-          <Ionicons name="arrow-back" size={24} color="#111827" />
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+          <Ionicons name="arrow-back" size={24} color={DesignTokens.colors.textPrimary} />
         </TouchableOpacity>
-        <Text className="text-xl font-bold text-gray-900 flex-1">Product Details</Text>
+        <Text style={styles.headerTitle}>Product Details</Text>
+        <TouchableOpacity style={styles.favoriteButton}>
+          <Ionicons name="heart-outline" size={24} color={DesignTokens.colors.textPrimary} />
+        </TouchableOpacity>
       </View>
 
-      <ScrollView className="flex-1">
-        {/* Product Info */}
-        <View className="px-6 py-4">
-          <Text className="text-2xl font-bold text-gray-900 mb-2">{productName}</Text>
-          <Text className="text-base text-gray-600 mb-4">{brandName}</Text>
-
-          {/* Type */}
-          <View className="mb-6">
-            <Text className="text-xs font-medium text-gray-400 uppercase mb-2">
-              Type
-            </Text>
-            <Text className="text-base text-gray-900">
-              {product.type.replace('_', ' ')}
-            </Text>
-          </View>
-
-          {/* Compatibility */}
-          {compatibility && (
-            <View className={`mb-6 p-4 rounded-lg ${compatibility.compatible ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'}`}>
-              <View className="flex-row items-center mb-2">
-                <Ionicons
-                  name={compatibility.compatible ? 'checkmark-circle' : 'alert-circle'}
-                  size={20}
-                  color={compatibility.compatible ? '#10B981' : '#EF4444'}
-                />
-                <Text className={`ml-2 font-semibold ${compatibility.compatible ? 'text-green-800' : 'text-red-800'}`}>
-                  {compatibility.compatible ? 'Compatible' : 'Not Recommended'}
-                </Text>
-              </View>
-              {compatibility.warnings.length > 0 && (
-                <View className="mt-2">
-                  {compatibility.warnings.map((warning, index) => (
-                    <Text key={index} className="text-sm text-gray-700 mt-1">
-                      • {warning}
-                    </Text>
-                  ))}
-                </View>
-              )}
+      <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        {/* Product Image */}
+        <View style={styles.imageContainer}>
+          {product.image_url ? (
+            <Image source={{ uri: product.image_url }} style={styles.productImage} contentFit="contain" />
+          ) : (
+            <View style={styles.imagePlaceholder}>
+              <Ionicons name="nutrition" size={80} color={DesignTokens.colors.textTertiary} />
             </View>
           )}
+        </View>
 
-          {/* Macros */}
-          <View className="mb-6">
-            <Text className="text-lg font-semibold text-gray-900 mb-4">Nutritional Info</Text>
-            <View className="bg-gray-50 rounded-lg p-4">
-              <View className="flex-row justify-between mb-3">
-                <Text className="text-gray-600">Calories</Text>
-                <Text className="font-semibold text-gray-900">{product.macros.calories}</Text>
-              </View>
-              <View className="flex-row justify-between mb-3">
-                <Text className="text-gray-600">Protein</Text>
-                <Text className="font-semibold text-gray-900">{product.macros.protein}g</Text>
-              </View>
-              <View className="flex-row justify-between mb-3">
-                <Text className="text-gray-600">Carbohydrates</Text>
-                <Text className="font-semibold text-gray-900">{product.macros.carbs}g</Text>
-              </View>
-              <View className="flex-row justify-between">
-                <Text className="text-gray-600">Fats</Text>
-                <Text className="font-semibold text-gray-900">{product.macros.fats}g</Text>
-              </View>
-              {product.serving_size && (
-                <View className="mt-3 pt-3 border-t border-gray-200">
-                  <Text className="text-sm text-gray-500">Serving Size: {product.serving_size}</Text>
-                </View>
-              )}
+        {/* Product Info */}
+        <View style={styles.infoSection}>
+          <Badge text={product.type.replace('_', ' ').toUpperCase()} variant="primary" size="sm" />
+          <Text style={styles.productName}>{productName}</Text>
+          <Text style={styles.brandName}>{brandName}</Text>
+        </View>
+
+        {/* Compatibility */}
+        {compatibility && (
+          <GlassCard style={[styles.compatibilityCard, !compatibility.compatible && styles.incompatibleCard]}>
+            <View style={styles.compatibilityHeader}>
+              <Ionicons
+                name={compatibility.compatible ? 'checkmark-circle' : 'alert-circle'}
+                size={24}
+                color={compatibility.compatible ? DesignTokens.colors.success : DesignTokens.colors.error}
+              />
+              <Text style={[styles.compatibilityTitle, !compatibility.compatible && styles.incompatibleText]}>
+                {compatibility.compatible ? 'Compatible with your profile' : 'Not Recommended'}
+              </Text>
             </View>
-          </View>
-
-          {/* Price Comparison */}
-          {prices && prices.length > 0 && (
-            <View className="mb-6">
-              <Text className="text-lg font-semibold text-gray-900 mb-4">Available in Stores</Text>
-              <View className="space-y-3">
-                {prices.slice(0, 5).map((price: any, index: number) => (
-                  <TouchableOpacity
-                    key={index}
-                    onPress={() => price.store_url && Linking.openURL(price.store_url)}
-                    className="bg-gray-50 rounded-lg p-4 border border-gray-200"
-                  >
-                    <View className="flex-row justify-between items-center">
-                      <View className="flex-1">
-                        <Text className="font-semibold text-gray-900">{price.store_name}</Text>
-                        {price.package_name && (
-                          <Text className="text-sm text-gray-500 mt-1">{price.package_name}</Text>
-                        )}
-                      </View>
-                      <View className="items-end">
-                        <Text className="text-lg font-bold text-gray-900">
-                          {price.price} RSD
-                        </Text>
-                        {price.delivery_fee > 0 && (
-                          <Text className="text-xs text-gray-500">+ {price.delivery_fee} RSD delivery</Text>
-                        )}
-                      </View>
-                    </View>
-                  </TouchableOpacity>
+            {compatibility.warnings?.length > 0 && (
+              <View style={styles.warningsList}>
+                {compatibility.warnings.map((warning: string, index: number) => (
+                  <Text key={index} style={styles.warningText}>• {warning}</Text>
                 ))}
               </View>
-            </View>
-          )}
+            )}
+          </GlassCard>
+        )}
 
-          {/* Buy Button */}
-          <Button
-            title="View Shopping Options"
-            onPress={handleBuyPress}
-            variant="primary"
-            className="mb-6"
-          />
-        </View>
+        {/* Macros */}
+        <GlassCard style={styles.macrosCard}>
+          <Text style={styles.sectionTitle}>Nutritional Info</Text>
+          <View style={styles.macrosGrid}>
+            <View style={styles.macroItem}>
+              <Text style={styles.macroValue}>{product.macros.calories}</Text>
+              <Text style={styles.macroLabel}>Calories</Text>
+            </View>
+            <View style={styles.macroItem}>
+              <Text style={styles.macroValue}>{product.macros.protein}g</Text>
+              <Text style={styles.macroLabel}>Protein</Text>
+            </View>
+            <View style={styles.macroItem}>
+              <Text style={styles.macroValue}>{product.macros.carbs}g</Text>
+              <Text style={styles.macroLabel}>Carbs</Text>
+            </View>
+            <View style={styles.macroItem}>
+              <Text style={styles.macroValue}>{product.macros.fats}g</Text>
+              <Text style={styles.macroLabel}>Fats</Text>
+            </View>
+          </View>
+          {product.serving_size && (
+            <Text style={styles.servingSize}>Per serving: {product.serving_size}</Text>
+          )}
+        </GlassCard>
+
+        {/* Prices */}
+        {prices && prices.length > 0 && (
+          <View style={styles.pricesSection}>
+            <Text style={styles.sectionTitle}>Available in Stores</Text>
+            {prices.slice(0, 5).map((price: any, index: number) => (
+              <TouchableOpacity
+                key={index}
+                style={styles.priceCard}
+                onPress={() => price.store_url && Linking.openURL(price.store_url)}
+              >
+                <View style={styles.priceInfo}>
+                  <Text style={styles.storeName}>{price.store_name}</Text>
+                  {price.package_name && <Text style={styles.packageName}>{price.package_name}</Text>}
+                </View>
+                <View style={styles.priceValue}>
+                  <Text style={styles.priceAmount}>{price.price} RSD</Text>
+                  <Ionicons name="chevron-forward" size={20} color={DesignTokens.colors.textTertiary} />
+                </View>
+              </TouchableOpacity>
+            ))}
+          </View>
+        )}
       </ScrollView>
+
+      {/* Bottom CTA */}
+      <View style={styles.bottomCTA}>
+        <ModernButton title="View Shopping Options" onPress={() => router.push(`/shopping/${id}`)} />
+      </View>
     </SafeAreaView>
-  )
+  );
 }
 
+
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: DesignTokens.colors.background },
+  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: DesignTokens.colors.glassBorder },
+  backButton: { padding: 8 },
+  headerTitle: { fontSize: 18, fontWeight: '700', color: DesignTokens.colors.textPrimary },
+  favoriteButton: { padding: 8 },
+  scroll: { flex: 1 },
+  scrollContent: { paddingBottom: 100 },
+  imageContainer: { height: 250, backgroundColor: DesignTokens.colors.surface, justifyContent: 'center', alignItems: 'center' },
+  productImage: { width: '100%', height: '100%' },
+  imagePlaceholder: { justifyContent: 'center', alignItems: 'center' },
+  infoSection: { padding: 20, gap: 8 },
+  productName: { fontSize: 28, fontWeight: '800', color: DesignTokens.colors.textPrimary, letterSpacing: -0.5 },
+  brandName: { fontSize: 16, color: DesignTokens.colors.textSecondary },
+  compatibilityCard: { marginHorizontal: 20, marginBottom: 16, padding: 16 },
+  incompatibleCard: { borderColor: `${DesignTokens.colors.error}40`, backgroundColor: `${DesignTokens.colors.error}10` },
+  compatibilityHeader: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  compatibilityTitle: { fontSize: 16, fontWeight: '600', color: DesignTokens.colors.success },
+  incompatibleText: { color: DesignTokens.colors.error },
+  warningsList: { marginTop: 12 },
+  warningText: { fontSize: 14, color: DesignTokens.colors.textSecondary, marginTop: 4 },
+  macrosCard: { marginHorizontal: 20, marginBottom: 16, padding: 20 },
+  sectionTitle: { fontSize: 18, fontWeight: '700', color: DesignTokens.colors.textPrimary, marginBottom: 16 },
+  macrosGrid: { flexDirection: 'row', justifyContent: 'space-between' },
+  macroItem: { alignItems: 'center', flex: 1 },
+  macroValue: { fontSize: 24, fontWeight: '800', color: DesignTokens.colors.textPrimary },
+  macroLabel: { fontSize: 12, color: DesignTokens.colors.textSecondary, marginTop: 4 },
+  servingSize: { fontSize: 13, color: DesignTokens.colors.textTertiary, marginTop: 16, textAlign: 'center' },
+  pricesSection: { paddingHorizontal: 20, marginBottom: 20 },
+  priceCard: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: DesignTokens.colors.surface, padding: 16, borderRadius: 12, marginTop: 12, borderWidth: 1, borderColor: DesignTokens.colors.glassBorder },
+  priceInfo: { flex: 1 },
+  storeName: { fontSize: 16, fontWeight: '600', color: DesignTokens.colors.textPrimary },
+  packageName: { fontSize: 13, color: DesignTokens.colors.textSecondary, marginTop: 2 },
+  priceValue: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  priceAmount: { fontSize: 18, fontWeight: '700', color: DesignTokens.colors.primary },
+  bottomCTA: { position: 'absolute', bottom: 0, left: 0, right: 0, padding: 20, backgroundColor: DesignTokens.colors.background, borderTopWidth: 1, borderTopColor: DesignTokens.colors.glassBorder },
+  emptyContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  emptyText: { fontSize: 18, color: DesignTokens.colors.textSecondary, marginTop: 16 },
+});
