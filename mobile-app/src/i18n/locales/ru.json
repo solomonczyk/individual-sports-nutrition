@@ -105,5 +105,16 @@
   "recommended_products": "Рекомендуемые продукты",
   "recommendations_goal_desc": "Персональные рекомендации на основе ваших целей",
   "servings_per_day": "порции(й) в день",
-  "grams_per_day": "г в день"
+  "grams_per_day": "г в день",
+  "filters": "Фильтры",
+  "product_type": "Тип продукта",
+  "brand": "Бренд",
+  "in_stock_only": "Только в наличии",
+  "recommended_only": "Рекомендовано для вас",
+  "reset": "Сбросить",
+  "apply": "Применить",
+  "search_products": "Поиск продуктов...",
+  "catalog": "Каталог",
+  "no_products": "Продукты не найдены",
+  "try_different_filters": "Попробуйте другие фильтры или поисковые запросы"
 }

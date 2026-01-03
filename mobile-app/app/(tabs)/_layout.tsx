@@ -40,12 +40,12 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="profile"
+        name="catalog"
         options={{
-          title: i18n.t('tab_profile'),
+          title: i18n.t('catalog'),
           tabBarIcon: ({ color, size, focused }) => (
             <View style={focused && styles.activeIconContainer}>
-              <Ionicons name={focused ? "person" : "person-outline"} size={24} color={color} />
+              <Ionicons name={focused ? "grid" : "grid-outline"} size={24} color={color} />
             </View>
           ),
         }}
@@ -62,12 +62,12 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="advice"
+        name="profile"
         options={{
-          title: i18n.t('tab_advice'),
+          title: i18n.t('tab_profile'),
           tabBarIcon: ({ color, size, focused }) => (
             <View style={focused && styles.activeIconContainer}>
-              <Ionicons name={focused ? "sparkles" : "sparkles-outline"} size={24} color={color} />
+              <Ionicons name={focused ? "person" : "person-outline"} size={24} color={color} />
             </View>
           ),
         }}
@@ -81,6 +81,12 @@ export default function TabsLayout() {
               <Ionicons name={focused ? "settings" : "settings-outline"} size={24} color={color} />
             </View>
           ),
+        }}
+      />
+      <Tabs.Screen
+        name="advice"
+        options={{
+          href: null, // Hide from tab bar
         }}
       />
     </Tabs>

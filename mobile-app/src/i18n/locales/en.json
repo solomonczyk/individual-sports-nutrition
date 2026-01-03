@@ -105,5 +105,16 @@
   "recommended_products": "Recommended Products",
   "recommendations_goal_desc": "Personalized recommendations based on your goals",
   "servings_per_day": "serving(s) per day",
-  "grams_per_day": "g per day"
+  "grams_per_day": "g per day",
+  "filters": "Filters",
+  "product_type": "Product Type",
+  "brand": "Brand",
+  "in_stock_only": "In Stock Only",
+  "recommended_only": "Recommended for You",
+  "reset": "Reset",
+  "apply": "Apply",
+  "search_products": "Search products...",
+  "catalog": "Catalog",
+  "no_products": "No products found",
+  "try_different_filters": "Try different filters or search terms"
 }
