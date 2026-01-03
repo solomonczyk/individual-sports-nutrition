@@ -9,6 +9,7 @@ import { z } from 'zod'
 import { ModernButton } from '../../src/components/ui/ModernButton'
 import { ModernInput } from '../../src/components/ui/ModernInput'
 import { GlassCard } from '../../src/components/ui/GlassCard'
+import { PasswordStrengthIndicator } from '../../src/components/ui/PasswordStrengthIndicator'
 import { authService } from '../../src/services/auth-service'
 import { useAuthStore } from '../../src/store/auth-store'
 import { useLanguageStore } from '../../src/store/language-store'
@@ -133,15 +134,18 @@ export default function RegisterScreen() {
                 control={control}
                 name="password"
                 render={({ field: { onChange, onBlur, value } }) => (
-                  <ModernInput
-                    label={i18n.t('password')}
-                    value={value}
-                    onChangeText={onChange}
-                    onBlur={onBlur}
-                    placeholder="••••••••"
-                    secureTextEntry
-                    error={errors.password?.message}
-                  />
+                  <>
+                    <ModernInput
+                      label={i18n.t('password')}
+                      value={value}
+                      onChangeText={onChange}
+                      onBlur={onBlur}
+                      placeholder="••••••••"
+                      secureTextEntry
+                      error={errors.password?.message}
+                    />
+                    <PasswordStrengthIndicator password={value} />
+                  </>
                 )}
               />
 

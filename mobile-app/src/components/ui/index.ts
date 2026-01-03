@@ -10,6 +10,7 @@ export { LoadingSpinner } from './LoadingSpinner';
 export { Modal } from './Modal';
 export { ModernButton } from './ModernButton';
 export { ModernInput } from './ModernInput';
+export { PasswordStrengthIndicator } from './PasswordStrengthIndicator';
 export { ProgressBar } from './ProgressBar';
 export { Skeleton } from './Skeleton';
 export { StepIndicator } from './StepIndicator';
