@@ -6,6 +6,7 @@ import { Ionicons } from '@expo/vector-icons'
 import { DesignTokens } from '../../src/constants/DesignTokens'
 import { GlassCard } from '../../src/components/ui/GlassCard'
 import { ModernButton } from '../../src/components/ui/ModernButton'
+import i18n from '../../src/i18n'
 
 export default function AdviceScreen() {
     const [query, setQuery] = useState('')
@@ -37,7 +38,7 @@ export default function AdviceScreen() {
                 <View style={styles.header}>
                     <View style={styles.headerTitleContainer}>
                         <Ionicons name="sparkles" size={28} color={DesignTokens.colors.primary} />
-                        <Text style={styles.title}>AI Advisor</Text>
+                        <Text style={styles.title}>{i18n.t('ai_advisor')}</Text>
                     </View>
                     <Text style={styles.subtitle}>2025 Intelligent Sport Nutrition</Text>
                 </View>
@@ -48,8 +49,7 @@ export default function AdviceScreen() {
                             <View style={styles.iconCircle}>
                                 <Ionicons name="chatbubble-ellipses-outline" size={64} color={DesignTokens.colors.textTertiary} />
                             </View>
-                            <Text style={styles.emptyTitle}>How can I help you today?</Text>
-                            <Text style={styles.emptyDesc}>Ask about supplements, recovery, or meal timing based on your profile.</Text>
+                            <Text style={styles.emptyTitle}>{i18n.t('ask_anything')}</Text>
                         </View>
                     )}
 
@@ -89,7 +89,7 @@ export default function AdviceScreen() {
                 <View style={styles.inputArea}>
                     <TextInput
                         style={styles.input}
-                        placeholder="Ask your nutritionist..."
+                        placeholder={i18n.t('ask_anything')}
                         placeholderTextColor={DesignTokens.colors.textTertiary}
                         value={query}
                         onChangeText={setQuery}
@@ -103,7 +103,13 @@ export default function AdviceScreen() {
                         style={styles.sendButton}
                         textStyle={{ display: 'none' }}
                     />
-                    <View style={styles.sendIconOverlay} pointerEvents="none">
+                    <View
+                        style={styles.sendIconOverlay}
+                        {...Platform.select({
+                            native: { pointerEvents: 'none' },
+                            default: {}
+                        })}
+                    >
                         <Ionicons name="arrow-up" size={24} color="#000" />
                     </View>
                 </View>
@@ -234,7 +240,7 @@ const styles = StyleSheet.create({
     },
     inputArea: {
         position: 'absolute',
-        bottom: 24,
+        bottom: 104, // Positioned above the floating tab bar (88px total height)
         left: 20,
         right: 20,
         flexDirection: 'row',
@@ -265,6 +271,9 @@ const styles = StyleSheet.create({
     sendIconOverlay: {
         position: 'absolute',
         right: 18,
+        ...Platform.select({
+            web: { pointerEvents: 'none' } as any,
+        }),
     },
     errorContainer: {
         flexDirection: 'row',

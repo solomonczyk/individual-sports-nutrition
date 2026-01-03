@@ -710,9 +710,16 @@
 - **Standardization**: Unified language codes to `uk` (Ukrainian) across mobile and backend services.
 - **API Debugging**: Resolved 404 on `/dosage/calculate` and 500 on `/meal-plan/generate` by seeding missing health profiles and nutrition plans for existing users.
 - **Service Optimization**: Improved `MealPlanGenerator` with explicit error codes (`PLAN_NOT_FOUND`) and status codes.
-- **UI Maintenance**: Fixed `pointerEvents` deprecation warning in `AdviceScreen`.
+- **Internationalization (i18n)**: Completed comprehensive Russian translation for the entire mobile app (Home, Advice, Progress, Profile, Settings) and shared components, adding 80+ keys to `en.json` and `ru.json`.
+- **Bug Fixes**:
+  - Resolved `ReferenceError: useRouter is not defined` in the Progress screen.
+  - Fixed `pointerEvents` deprecation warning in the Advice screen using `Platform.select` for cross-platform compatibility.
+  - Fixed Layout Overlap: Repositioned the AI Advisor input field to sit above the floating tab bar, resolving accessibility issues reported in screenshots.
+- **Resiliency**: Implemented automatic redirect to the Welcome screen on `401 Unauthorized` errors in `api-client.ts` to improve UX during session expiration.
+- **Infrastructure**: Successfully restored the AI Service (Python) by re-installing dependencies in a fresh virtual environment.
 
 **Next Steps**:
 - Verify dosage calculation with real product IDs.
 - Expand Serbian cuisine database entries.
 - Implement shopping options comparison logic.
+- Perform final UI audit for RTL/LTR layout consistency.

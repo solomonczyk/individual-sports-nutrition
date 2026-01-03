@@ -11,6 +11,7 @@ import { ProgressHistory } from '../../src/components/progress/ProgressHistory'
 import { LoadingSpinner } from '../../src/components/ui/LoadingSpinner'
 import { EmptyState } from '../../src/components/ui/EmptyState'
 import i18n from '../../src/i18n'
+import { useRouter } from 'expo-router'
 
 export default function ProgressScreen() {
   const { user } = useAuthStore()
@@ -29,7 +30,7 @@ export default function ProgressScreen() {
   const dateRange = useMemo(() => {
     const endDate = new Date()
     const startDate = new Date()
-    
+
     switch (selectedPeriod) {
       case '7d':
         startDate.setDate(endDate.getDate() - 7)
@@ -41,7 +42,7 @@ export default function ProgressScreen() {
         startDate.setDate(endDate.getDate() - 90)
         break
     }
-    
+
     return { startDate, endDate }
   }, [selectedPeriod])
 
@@ -51,7 +52,7 @@ export default function ProgressScreen() {
     queryFn: async () => {
       const { startDate, endDate } = dateRange
       const plans = []
-      
+
       // Fetch meal plans for each day in the range
       const currentDate = new Date(startDate)
       while (currentDate <= endDate) {
@@ -65,7 +66,7 @@ export default function ProgressScreen() {
         }
         currentDate.setDate(currentDate.getDate() + 1)
       }
-      
+
       return plans
     },
     enabled: !!user,
@@ -80,7 +81,7 @@ export default function ProgressScreen() {
   // Prepare chart data
   const caloriesChartData: ChartDataPoint[] = useMemo(() => {
     if (!mealPlansData || mealPlansData.length === 0) return []
-    
+
     return mealPlansData
       .filter((p) => p.mealPlan)
       .map(({ date, mealPlan }) => {
@@ -97,9 +98,9 @@ export default function ProgressScreen() {
 
   const macrosChartData = useMemo(() => {
     if (!mealPlansData || mealPlansData.length === 0) return null
-    
+
     const last14Days = mealPlansData.filter((p) => p.mealPlan).slice(-14)
-    
+
     return {
       protein: last14Days.map(({ date, mealPlan }) => {
         const dateObj = new Date(date)
@@ -164,7 +165,7 @@ export default function ProgressScreen() {
     return (
       <SafeAreaView className="flex-1 bg-white">
         <StatusBar style="dark" />
-        <LoadingSpinner message="Loading progress..." />
+        <LoadingSpinner message={i18n.t('loading_progress')} />
       </SafeAreaView>
     )
   }
@@ -178,24 +179,22 @@ export default function ProgressScreen() {
       >
         {/* Header */}
         <View className="px-6 py-4 bg-blue-50 border-b border-blue-100">
-          <Text className="text-2xl font-bold text-gray-900 mb-4">Progress</Text>
-          
+          <Text className="text-2xl font-bold text-gray-900 mb-4">{i18n.t('tab_progress')}</Text>
+
           {/* Period selector */}
           <View className="flex-row gap-2">
             {(['7d', '30d', '90d'] as const).map((period) => (
               <TouchableOpacity
                 key={period}
                 onPress={() => setSelectedPeriod(period)}
-                className={`px-4 py-2 rounded-lg ${
-                  selectedPeriod === period ? 'bg-blue-600' : 'bg-white border border-gray-300'
-                }`}
+                className={`px-4 py-2 rounded-lg ${selectedPeriod === period ? 'bg-blue-600' : 'bg-white border border-gray-300'
+                  }`}
               >
                 <Text
-                  className={`text-sm font-semibold ${
-                    selectedPeriod === period ? 'text-white' : 'text-gray-700'
-                  }`}
+                  className={`text-sm font-semibold ${selectedPeriod === period ? 'text-white' : 'text-gray-700'
+                    }`}
                 >
-                  {period === '7d' ? '7 days' : period === '30d' ? '30 days' : '90 days'}
+                  {period === '7d' ? i18n.t('seven_days') : period === '30d' ? i18n.t('thirty_days') : i18n.t('ninety_days')}
                 </Text>
               </TouchableOpacity>
             ))}
@@ -204,24 +203,24 @@ export default function ProgressScreen() {
 
         {/* Statistics Summary */}
         <View className="px-6 py-4 bg-white border-b border-gray-200">
-          <Text className="text-lg font-semibold text-gray-900 mb-3">Statistics</Text>
+          <Text className="text-lg font-semibold text-gray-900 mb-3">{i18n.t('statistics')}</Text>
           <View className="flex-row gap-4 mb-3">
             <View className="flex-1">
-              <Text className="text-xs text-gray-500 mb-1">Avg Calories</Text>
+              <Text className="text-xs text-gray-500 mb-1">{i18n.t('avg_calories')}</Text>
               <Text className="text-lg font-bold text-gray-900">
                 {Math.round(stats.avgCalories)}
               </Text>
               <Text className="text-xs text-gray-400">/ {Math.round(targetCalories)}</Text>
             </View>
             <View className="flex-1">
-              <Text className="text-xs text-gray-500 mb-1">Avg Protein</Text>
+              <Text className="text-xs text-gray-500 mb-1">{i18n.t('avg_protein')}</Text>
               <Text className="text-lg font-bold text-gray-900">
                 {Math.round(stats.avgProtein)}g
               </Text>
               <Text className="text-xs text-gray-400">/ {Math.round(targetProtein)}g</Text>
             </View>
             <View className="flex-1">
-              <Text className="text-xs text-gray-500 mb-1">Days Tracked</Text>
+              <Text className="text-xs text-gray-500 mb-1">{i18n.t('days_tracked')}</Text>
               <Text className="text-lg font-bold text-gray-900">{stats.daysTracked}</Text>
             </View>
           </View>
@@ -231,7 +230,7 @@ export default function ProgressScreen() {
         {caloriesChartData.length > 0 && (
           <View className="px-6 py-4">
             <LineChart
-              title="Calories Over Time"
+              title={i18n.t('calories_over_time')}
               data={caloriesChartData}
               unit=" kcal"
               color="#3B82F6"
@@ -243,7 +242,7 @@ export default function ProgressScreen() {
         {macrosChartData && (
           <View className="px-6 py-4">
             <ProgressChart
-              title="Macronutrients (Last 14 Days)"
+              title={i18n.t('macros_last_14_days')}
               data={macrosChartData.protein}
               unit="g"
               color="#EF4444"
@@ -268,8 +267,8 @@ export default function ProgressScreen() {
         ) : (
           <View className="px-6 py-8">
             <EmptyState
-              title="No progress data"
-              message="Start tracking your meals to see progress"
+              title={i18n.t('no_progress_data')}
+              message={i18n.t('start_tracking_desc')}
             />
           </View>
         )}

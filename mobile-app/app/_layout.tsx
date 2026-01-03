@@ -6,6 +6,7 @@ import { useEffect } from 'react'
 // TODO: Восстановить после исправления конфигурации NativeWind для веб
 // import '../global.css'
 import { useLanguageStore } from '../src/store/language-store'
+import { ToastProvider } from '../src/components/ui/ToastProvider'
 import i18n from '../src/i18n'
 
 const queryClient = new QueryClient({
@@ -27,16 +28,18 @@ export default function RootLayout() {
   return (
     <QueryClientProvider client={queryClient}>
       <SafeAreaProvider>
-        <Stack
-          screenOptions={{
-            headerShown: false,
-          }}
-        >
-          <Stack.Screen name="index" />
-          <Stack.Screen name="(onboarding)" options={{ headerShown: false }} />
-          <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        </Stack>
+        <ToastProvider>
+          <Stack
+            screenOptions={{
+              headerShown: false,
+            }}
+          >
+            <Stack.Screen name="index" />
+            <Stack.Screen name="(onboarding)" options={{ headerShown: false }} />
+            <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          </Stack>
+        </ToastProvider>
       </SafeAreaProvider>
     </QueryClientProvider>
   )

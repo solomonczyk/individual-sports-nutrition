@@ -5,6 +5,7 @@ import { ProductCard } from '../product/ProductCard'
 import { LoadingSpinner } from '../ui/LoadingSpinner'
 import { EmptyState } from '../ui/EmptyState'
 import { cn } from '../utils/cn'
+import i18n from '../../i18n'
 
 interface RecommendationListProps {
   recommendations: ProductRecommendation[]
@@ -26,25 +27,25 @@ export function RecommendationList({
   const getDosageForProduct = (productId: string): string | undefined => {
     const dosage = dosages?.find((d) => d.product_id === productId)
     if (!dosage) return undefined
-    
+
     if (dosage.daily_servings > 0) {
-      return `${dosage.daily_servings} serving(s) per day`
+      return `${dosage.daily_servings} ${i18n.t('servings_per_day')}`
     }
     if (dosage.daily_grams > 0) {
-      return `${dosage.daily_grams}g per day`
+      return `${dosage.daily_grams}${i18n.t('grams_per_day')}`
     }
     return undefined
   }
 
   if (loading) {
-    return <LoadingSpinner message="Loading recommendations..." />
+    return <LoadingSpinner message={i18n.t('loading_recommendations')} />
   }
 
   if (recommendations.length === 0) {
     return (
       <EmptyState
-        title="No recommendations"
-        message="Complete your health profile to get personalized product recommendations"
+        title={i18n.t('no_recommendations')}
+        message={i18n.t('complete_profile_desc')}
       />
     )
   }
@@ -53,10 +54,10 @@ export function RecommendationList({
     <View className={cn('flex-1', className)}>
       <View className="px-6 py-4">
         <Text className="text-2xl font-bold text-gray-900 mb-2">
-          Recommended Products
+          {i18n.t('recommended_products')}
         </Text>
         <Text className="text-gray-600 mb-4">
-          Personalized recommendations based on your goals
+          {i18n.t('recommendations_goal_desc')}
         </Text>
       </View>
 

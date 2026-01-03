@@ -115,7 +115,7 @@ export default function HomeScreen() {
         {nutritionPlanData?.data && (
           <View style={styles.bentoContainer}>
             <GlassCard style={styles.mainBento}>
-              <Text style={styles.bentoLabel}>Daily Target</Text>
+              <Text style={styles.bentoLabel}>{i18n.t('daily_target')}</Text>
               <Text style={styles.bentoMainValue}>
                 {Math.round(nutritionPlanData.data.calories)}
                 <Text style={styles.bentoUnit}> kcal</Text>
@@ -127,15 +127,15 @@ export default function HomeScreen() {
 
             <View style={styles.bentoRow}>
               <GlassCard style={styles.smallBento}>
-                <Text style={styles.bentoLabel}>Protein</Text>
+                <Text style={styles.bentoLabel}>{i18n.t('protein')}</Text>
                 <Text style={styles.bentoValue}>{Math.round(nutritionPlanData.data.protein)}g</Text>
               </GlassCard>
               <GlassCard style={styles.smallBento}>
-                <Text style={styles.bentoLabel}>Carbs</Text>
+                <Text style={styles.bentoLabel}>{i18n.t('carbs')}</Text>
                 <Text style={styles.bentoValue}>{Math.round(nutritionPlanData.data.carbs)}g</Text>
               </GlassCard>
               <GlassCard style={styles.smallBento}>
-                <Text style={styles.bentoLabel}>Fats</Text>
+                <Text style={styles.bentoLabel}>{i18n.t('fats')}</Text>
                 <Text style={styles.bentoValue}>{Math.round(nutritionPlanData.data.fats)}g</Text>
               </GlassCard>
             </View>
@@ -145,14 +145,14 @@ export default function HomeScreen() {
         {/* Meal Plan Section */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Today's Fuel</Text>
+            <Text style={styles.sectionTitle}>{i18n.t('todays_fuel')}</Text>
             <TouchableOpacity onPress={() => router.push('/meal')}>
-              <Text style={styles.seeAllText}>See Plan</Text>
+              <Text style={styles.seeAllText}>{i18n.t('see_plan')}</Text>
             </TouchableOpacity>
           </View>
 
           {mealPlanLoading ? (
-            <LoadingSpinner message="Optimizing meals..." />
+            <LoadingSpinner message={i18n.t('optimizing_meals')} />
           ) : mealPlanData?.data ? (
             <DailyMealPlan
               mealPlan={mealPlanData.data}
@@ -163,10 +163,10 @@ export default function HomeScreen() {
           ) : (
             <GlassCard style={styles.emptyPlanCard}>
               <Ionicons name="restaurant-outline" size={40} color={DesignTokens.colors.textTertiary} />
-              <Text style={styles.emptyPlanTitle}>No active plan</Text>
-              <Text style={styles.emptyPlanDesc}>Let me build a meal plan that fits your nutrition targets.</Text>
+              <Text style={styles.emptyPlanTitle}>{i18n.t('no_active_plan')}</Text>
+              <Text style={styles.emptyPlanDesc}>{i18n.t('no_active_plan_desc')}</Text>
               <ModernButton
-                title="Generate Evolution Plan"
+                title={i18n.t('generate_evolution_plan')}
                 onPress={handleGenerateMealPlan}
                 style={styles.generateButton}
               />
@@ -177,10 +177,10 @@ export default function HomeScreen() {
         {/* Recommendations Section */}
         <View style={[styles.section, { marginBottom: 120 }]}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Performance Stack</Text>
+            <Text style={styles.sectionTitle}>{i18n.t('performance_stack')}</Text>
           </View>
           {recommendationsLoading || dosagesLoading ? (
-            <LoadingSpinner message="Analyzing data..." />
+            <LoadingSpinner message={i18n.t('analyzing_data')} />
           ) : (
             <RecommendationList
               recommendations={recommendationsData?.data || []}

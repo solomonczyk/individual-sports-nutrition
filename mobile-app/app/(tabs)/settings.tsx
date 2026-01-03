@@ -26,12 +26,12 @@ export default function SettingsScreen() {
 
   const handleLogout = () => {
     Alert.alert(
-      'Logout',
-      'Are you sure you want to logout?',
+      i18n.t('logout'),
+      i18n.t('logout_confirm'),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: i18n.t('cancel'), style: 'cancel' },
         {
-          text: 'Logout',
+          text: i18n.t('logout'),
           style: 'destructive',
           onPress: () => {
             logout()
@@ -53,22 +53,22 @@ export default function SettingsScreen() {
 
   const getGoalLabel = (goal?: string) => {
     const goals: Record<string, string> = {
-      mass: 'Mass Gain',
-      cut: 'Weight Loss',
-      maintain: 'Maintenance',
-      endurance: 'Endurance',
+      mass: i18n.t('mass_gain'),
+      cut: i18n.t('weight_loss'),
+      maintain: i18n.t('maintenance'),
+      endurance: i18n.t('endurance'),
     }
-    return goal ? goals[goal] || goal : 'Not set'
+    return goal ? goals[goal] || goal : i18n.t('not_set')
   }
 
   const getActivityLabel = (activity?: string) => {
     const activities: Record<string, string> = {
-      low: 'Low',
-      moderate: 'Moderate',
-      high: 'High',
-      very_high: 'Very High',
+      low: i18n.t('low'),
+      moderate: i18n.t('moderate'),
+      high: i18n.t('high'),
+      very_high: i18n.t('very_high'),
     }
-    return activity ? activities[activity] || activity : 'Not set'
+    return activity ? activities[activity] || activity : i18n.t('not_set')
   }
 
   return (
@@ -77,13 +77,13 @@ export default function SettingsScreen() {
       <ScrollView className="flex-1">
         <View className="px-6 py-4">
           <Text className="text-3xl font-bold text-gray-900 mb-8">
-            Settings
+            {i18n.t('tab_settings')}
           </Text>
 
           {/* Profile Section */}
           <View className="mb-6">
             <Text className="text-lg font-semibold text-gray-900 mb-4">
-              Profile
+              {i18n.t('tab_profile')}
             </Text>
             <View className="bg-gray-50 rounded-lg overflow-hidden">
               {/* Edit Health Profile */}
@@ -93,12 +93,12 @@ export default function SettingsScreen() {
               >
                 <View className="flex-1">
                   <Text className="text-base font-semibold text-gray-900">
-                    Health Profile
+                    {i18n.t('health_profile')}
                   </Text>
                   <Text className="text-sm text-gray-500 mt-1">
                     {healthProfile
-                      ? `${healthProfile.age} years, ${getGoalLabel(healthProfile.goal)}`
-                      : 'Not set'}
+                      ? `${healthProfile.age} ${i18n.t('years')}, ${getGoalLabel(healthProfile.goal)}`
+                      : i18n.t('not_set')}
                   </Text>
                 </View>
                 <Ionicons name="chevron-forward" size={20} color="#6B7280" />
@@ -107,7 +107,7 @@ export default function SettingsScreen() {
               {/* Current Goal */}
               {healthProfile && (
                 <View className="px-4 py-3 border-b border-gray-200">
-                  <Text className="text-sm text-gray-500 mb-1">Current Goal</Text>
+                  <Text className="text-sm text-gray-500 mb-1">{i18n.t('current_goal')}</Text>
                   <Text className="text-base font-semibold text-gray-900">
                     {getGoalLabel(healthProfile.goal)}
                   </Text>
@@ -117,7 +117,7 @@ export default function SettingsScreen() {
               {/* Activity Level */}
               {healthProfile && (
                 <View className="px-4 py-3 border-b border-gray-200">
-                  <Text className="text-sm text-gray-500 mb-1">Activity Level</Text>
+                  <Text className="text-sm text-gray-500 mb-1">{i18n.t('activity_level')}</Text>
                   <Text className="text-base font-semibold text-gray-900">
                     {getActivityLabel(healthProfile.activity_level)}
                   </Text>
@@ -129,13 +129,13 @@ export default function SettingsScreen() {
                 <View className="px-4 py-3">
                   <View className="flex-row justify-between">
                     <View className="flex-1">
-                      <Text className="text-sm text-gray-500 mb-1">Weight</Text>
+                      <Text className="text-sm text-gray-500 mb-1">{i18n.t('weight')}</Text>
                       <Text className="text-base font-semibold text-gray-900">
                         {healthProfile.weight} kg
                       </Text>
                     </View>
                     <View className="flex-1 ml-4">
-                      <Text className="text-sm text-gray-500 mb-1">Height</Text>
+                      <Text className="text-sm text-gray-500 mb-1">{i18n.t('height')}</Text>
                       <Text className="text-base font-semibold text-gray-900">
                         {healthProfile.height} cm
                       </Text>
@@ -149,7 +149,7 @@ export default function SettingsScreen() {
           {/* Preferences Section */}
           <View className="mb-6">
             <Text className="text-lg font-semibold text-gray-900 mb-4">
-              Preferences
+              {i18n.t('preferences')}
             </Text>
             <View className="bg-gray-50 rounded-lg overflow-hidden">
               {/* Language Selection */}
@@ -190,16 +190,16 @@ export default function SettingsScreen() {
           {/* Notifications Section */}
           <View className="mb-6">
             <Text className="text-lg font-semibold text-gray-900 mb-4">
-              Notifications
+              {i18n.t('notifications')}
             </Text>
             <View className="bg-gray-50 rounded-lg overflow-hidden">
               <View className="flex-row items-center justify-between px-4 py-4 border-b border-gray-200">
                 <View className="flex-1">
                   <Text className="text-base font-semibold text-gray-900">
-                    Meal Reminders
+                    {i18n.t('meal_reminders')}
                   </Text>
                   <Text className="text-sm text-gray-500 mt-1">
-                    Get reminded about meals
+                    {i18n.t('meal_reminders_desc')}
                   </Text>
                 </View>
                 <Switch
@@ -214,10 +214,10 @@ export default function SettingsScreen() {
               <View className="flex-row items-center justify-between px-4 py-4 border-b border-gray-200">
                 <View className="flex-1">
                   <Text className="text-base font-semibold text-gray-900">
-                    Supplement Reminders
+                    {i18n.t('supplement_reminders')}
                   </Text>
                   <Text className="text-sm text-gray-500 mt-1">
-                    Get reminded about supplements
+                    {i18n.t('supplement_reminders_desc')}
                   </Text>
                 </View>
                 <Switch
@@ -232,10 +232,10 @@ export default function SettingsScreen() {
               <View className="flex-row items-center justify-between px-4 py-4">
                 <View className="flex-1">
                   <Text className="text-base font-semibold text-gray-900">
-                    Progress Updates
+                    {i18n.t('progress_updates')}
                   </Text>
                   <Text className="text-sm text-gray-500 mt-1">
-                    Weekly progress summary
+                    {i18n.t('progress_updates_desc')}
                   </Text>
                 </View>
                 <Switch
@@ -253,7 +253,7 @@ export default function SettingsScreen() {
           {/* Account Section */}
           <View className="mb-6">
             <Text className="text-lg font-semibold text-gray-900 mb-4">
-              Account
+              {i18n.t('account')}
             </Text>
             <View className="bg-gray-50 rounded-lg p-4">
               <Text className="text-gray-600 mb-1">Email</Text>
@@ -267,7 +267,7 @@ export default function SettingsScreen() {
             className="bg-red-50 border border-red-200 rounded-lg p-4 flex-row items-center justify-center mb-8"
           >
             <Ionicons name="log-out-outline" size={20} color="#dc2626" />
-            <Text className="text-red-600 font-semibold ml-2">Logout</Text>
+            <Text className="text-red-600 font-semibold ml-2">{i18n.t('logout')}</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>

@@ -21,7 +21,7 @@ export default function ProfileScreen() {
   if (isLoading) {
     return (
       <SafeAreaView className="flex-1 bg-white items-center justify-center">
-        <Text>Loading...</Text>
+        <Text>{i18n.t('loading', { defaultValue: 'Loading...' })}</Text>
       </SafeAreaView>
     )
   }
@@ -29,19 +29,22 @@ export default function ProfileScreen() {
   if (!profile?.data) {
     return (
       <SafeAreaView className="flex-1 bg-white">
-        <ScrollView className="flex-1 px-6 py-8">
+        <ScrollView
+          className="flex-1 px-6 py-8"
+          contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}
+        >
           <View className="items-center justify-center flex-1">
             <Text className="text-xl font-semibold text-gray-900 mb-4">
-              No Health Profile
+              {i18n.t('no_health_profile', { defaultValue: 'No Health Profile' })}
             </Text>
             <Text className="text-gray-600 text-center mb-8">
-              Create your health profile to get personalized recommendations
+              {i18n.t('create_profile_desc', { defaultValue: 'Create your health profile to get personalized recommendations' })}
             </Text>
             <TouchableOpacity
               onPress={() => router.push('/health-profile/create')}
               className="bg-blue-600 px-6 py-3 rounded-lg"
             >
-              <Text className="text-white font-semibold">Create Profile</Text>
+              <Text className="text-white font-semibold">{i18n.t('create_profile', { defaultValue: 'Create Profile' })}</Text>
             </TouchableOpacity>
           </View>
         </ScrollView>
@@ -59,7 +62,7 @@ export default function ProfileScreen() {
           {/* Header */}
           <View className="mb-8">
             <Text className="text-3xl font-bold text-gray-900 mb-2">
-              {i18n.t('profile', { defaultValue: 'Profile' })}
+              {i18n.t('tab_profile')}
             </Text>
             <Text className="text-gray-600">{user?.email}</Text>
           </View>
@@ -67,41 +70,41 @@ export default function ProfileScreen() {
           {/* Profile Info */}
           <View className="bg-gray-50 rounded-lg p-6 mb-6">
             <View className="flex-row justify-between items-center mb-4">
-              <Text className="text-lg font-semibold text-gray-900">Personal Info</Text>
+              <Text className="text-lg font-semibold text-gray-900">{i18n.t('personal_info')}</Text>
               <TouchableOpacity
                 onPress={() => router.push('/health-profile/edit')}
                 className="flex-row items-center"
               >
                 <Ionicons name="create-outline" size={20} color="#2563eb" />
-                <Text className="text-blue-600 ml-1">Edit</Text>
+                <Text className="text-blue-600 ml-1">{i18n.t('edit')}</Text>
               </TouchableOpacity>
             </View>
 
             <View className="space-y-3">
               <View className="flex-row justify-between">
-                <Text className="text-gray-600">Age</Text>
-                <Text className="font-semibold text-gray-900">{profileData.age} years</Text>
+                <Text className="text-gray-600">{i18n.t('age')}</Text>
+                <Text className="font-semibold text-gray-900">{profileData.age} {i18n.t('years')}</Text>
               </View>
               <View className="flex-row justify-between">
-                <Text className="text-gray-600">Gender</Text>
+                <Text className="text-gray-600">{i18n.t('gender')}</Text>
                 <Text className="font-semibold text-gray-900 capitalize">{profileData.gender}</Text>
               </View>
               <View className="flex-row justify-between">
-                <Text className="text-gray-600">Weight</Text>
+                <Text className="text-gray-600">{i18n.t('weight')}</Text>
                 <Text className="font-semibold text-gray-900">{profileData.weight} kg</Text>
               </View>
               <View className="flex-row justify-between">
-                <Text className="text-gray-600">Height</Text>
+                <Text className="text-gray-600">{i18n.t('height')}</Text>
                 <Text className="font-semibold text-gray-900">{profileData.height} cm</Text>
               </View>
               <View className="flex-row justify-between">
-                <Text className="text-gray-600">Activity Level</Text>
+                <Text className="text-gray-600">{i18n.t('activity_level')}</Text>
                 <Text className="font-semibold text-gray-900 capitalize">
                   {profileData.activity_level.replace('_', ' ')}
                 </Text>
               </View>
               <View className="flex-row justify-between">
-                <Text className="text-gray-600">Goal</Text>
+                <Text className="text-gray-600">{i18n.t('goal')}</Text>
                 <Text className="font-semibold text-gray-900 capitalize">{profileData.goal}</Text>
               </View>
             </View>
@@ -111,43 +114,43 @@ export default function ProfileScreen() {
           {(profileData.allergies?.length > 0 ||
             profileData.diseases?.length > 0 ||
             profileData.medications?.length > 0) && (
-            <View className="bg-gray-50 rounded-lg p-6 mb-6">
-              <Text className="text-lg font-semibold text-gray-900 mb-4">Health Information</Text>
+              <View className="bg-gray-50 rounded-lg p-6 mb-6">
+                <Text className="text-lg font-semibold text-gray-900 mb-4">{i18n.t('health_information')}</Text>
 
-              {profileData.allergies?.length > 0 && (
-                <View className="mb-4">
-                  <Text className="text-gray-600 mb-2">Allergies</Text>
-                  {profileData.allergies.map((allergy, index) => (
-                    <Text key={index} className="font-semibold text-gray-900">
-                      • {allergy}
-                    </Text>
-                  ))}
-                </View>
-              )}
+                {profileData.allergies?.length > 0 && (
+                  <View className="mb-4">
+                    <Text className="text-gray-600 mb-2">{i18n.t('allergies')}</Text>
+                    {profileData.allergies.map((allergy, index) => (
+                      <Text key={index} className="font-semibold text-gray-900">
+                        • {allergy}
+                      </Text>
+                    ))}
+                  </View>
+                )}
 
-              {profileData.diseases?.length > 0 && (
-                <View className="mb-4">
-                  <Text className="text-gray-600 mb-2">Diseases</Text>
-                  {profileData.diseases.map((disease, index) => (
-                    <Text key={index} className="font-semibold text-gray-900">
-                      • {disease}
-                    </Text>
-                  ))}
-                </View>
-              )}
+                {profileData.diseases?.length > 0 && (
+                  <View className="mb-4">
+                    <Text className="text-gray-600 mb-2">{i18n.t('diseases')}</Text>
+                    {profileData.diseases.map((disease, index) => (
+                      <Text key={index} className="font-semibold text-gray-900">
+                        • {disease}
+                      </Text>
+                    ))}
+                  </View>
+                )}
 
-              {profileData.medications?.length > 0 && (
-                <View>
-                  <Text className="text-gray-600 mb-2">Medications</Text>
-                  {profileData.medications.map((medication, index) => (
-                    <Text key={index} className="font-semibold text-gray-900">
-                      • {medication}
-                    </Text>
-                  ))}
-                </View>
-              )}
-            </View>
-          )}
+                {profileData.medications?.length > 0 && (
+                  <View>
+                    <Text className="text-gray-600 mb-2">{i18n.t('medications')}</Text>
+                    {profileData.medications.map((medication, index) => (
+                      <Text key={index} className="font-semibold text-gray-900">
+                        • {medication}
+                      </Text>
+                    ))}
+                  </View>
+                )}
+              </View>
+            )}
         </View>
       </ScrollView>
     </SafeAreaView>

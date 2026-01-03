@@ -1,6 +1,7 @@
 import axios, { AxiosInstance, AxiosError } from 'axios'
 import { API_CONFIG } from '../config/api'
 import { useAuthStore } from '../store/auth-store'
+import { router } from 'expo-router'
 
 class ApiClient {
   private client: AxiosInstance
@@ -44,6 +45,7 @@ class ApiClient {
         if (error.response?.status === 401) {
           // Токен невалидный - разлогиниваем пользователя
           useAuthStore.getState().logout()
+          router.replace('/(onboarding)/welcome')
         }
 
         return Promise.reject(error)

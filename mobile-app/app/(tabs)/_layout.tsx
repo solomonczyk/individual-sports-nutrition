@@ -2,6 +2,7 @@ import { Tabs } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
 import { View, Platform } from 'react-native'
 import { DesignTokens } from '../../src/constants/DesignTokens'
+import i18n from '../../src/i18n'
 
 export default function TabsLayout() {
   return (
@@ -30,7 +31,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="home"
         options={{
-          title: 'Home',
+          title: i18n.t('tab_home'),
           tabBarIcon: ({ color, size, focused }) => (
             <View style={focused && styles.activeIconContainer}>
               <Ionicons name={focused ? "home" : "home-outline"} size={24} color={color} />
@@ -41,7 +42,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="profile"
         options={{
-          title: 'Profile',
+          title: i18n.t('tab_profile'),
           tabBarIcon: ({ color, size, focused }) => (
             <View style={focused && styles.activeIconContainer}>
               <Ionicons name={focused ? "person" : "person-outline"} size={24} color={color} />
@@ -52,7 +53,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="progress"
         options={{
-          title: 'Progress',
+          title: i18n.t('tab_progress'),
           tabBarIcon: ({ color, size, focused }) => (
             <View style={focused && styles.activeIconContainer}>
               <Ionicons name={focused ? "stats-chart" : "stats-chart-outline"} size={24} color={color} />
@@ -63,7 +64,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="advice"
         options={{
-          title: 'AI Advice',
+          title: i18n.t('tab_advice'),
           tabBarIcon: ({ color, size, focused }) => (
             <View style={focused && styles.activeIconContainer}>
               <Ionicons name={focused ? "sparkles" : "sparkles-outline"} size={24} color={color} />
@@ -74,7 +75,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="settings"
         options={{
-          title: 'Settings',
+          title: i18n.t('tab_settings'),
           tabBarIcon: ({ color, size, focused }) => (
             <View style={focused && styles.activeIconContainer}>
               <Ionicons name={focused ? "settings" : "settings-outline"} size={24} color={color} />
