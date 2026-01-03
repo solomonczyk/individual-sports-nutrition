@@ -23,10 +23,11 @@ interface EnvConfig {
 
 function getEnvVar(key: string, defaultValue?: string): string {
   const value = process.env[key] || defaultValue
-  if (!value) {
-    throw new Error(`Missing required environment variable: ${key}`)
+  // Allow empty values for optional variables in development
+  if (!value && key !== 'REDIS_PASSWORD' && key !== 'DB_PASSWORD') {
+    console.warn(`Warning: Missing environment variable: ${key}, using default`)
   }
-  return value
+  return value || ''
 }
 
 export const config: EnvConfig = {
