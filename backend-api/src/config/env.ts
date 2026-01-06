@@ -19,6 +19,7 @@ interface EnvConfig {
   JWT_EXPIRES_IN: string
   AI_SERVICE_URL: string
   CORS_ORIGIN: string
+  SENTRY_DSN: string
 }
 
 function getEnvVar(key: string, defaultValue?: string): string {
@@ -47,5 +48,6 @@ export const config: EnvConfig = {
   JWT_EXPIRES_IN: getEnvVar('JWT_EXPIRES_IN', '7d'),
   AI_SERVICE_URL: getEnvVar('AI_SERVICE_URL', 'http://localhost:8000'),
   CORS_ORIGIN: getEnvVar('CORS_ORIGIN', 'http://localhost:3001,http://localhost:8081'),
+  SENTRY_DSN: process.env.SENTRY_DSN || '',
 }
 

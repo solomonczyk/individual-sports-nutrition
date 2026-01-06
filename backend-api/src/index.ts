@@ -1,15 +1,59 @@
 import express from 'express'
 import cors from 'cors'
 import helmet from 'helmet'
+import compression from 'compression'
+import { initSentry, Sentry } from './config/sentry'
 import { config } from './config/env'
 import { logger } from './utils/logger'
 import { errorHandler } from './middlewares/error-handler'
 import { notFoundHandler } from './middlewares/not-found'
+import { apiLimiter } from './middlewares/rate-limit'
+import { httpsRedirect, securityHeaders } from './middlewares/https-redirect'
+import { performanceMonitoring, memoryMonitoring } from './middlewares/performance'
+import { cacheService } from './services/cache-service'
 import routes from './routes'
+
+// Initialize Sentry before importing anything else
+initSentry()
 
 const app = express()
 
-app.use(helmet())
+// Sentry request handler must be the first middleware (only if Sentry is initialized)
+if (process.env.SENTRY_DSN) {
+  app.use(Sentry.Handlers.requestHandler())
+  // TracingHandler creates a trace for every incoming request
+  app.use(Sentry.Handlers.tracingHandler())
+}
+
+// HTTPS redirect and security headers
+app.use(httpsRedirect)
+app.use(securityHeaders)
+
+// Performance monitoring
+app.use(performanceMonitoring)
+app.use(memoryMonitoring)
+
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      scriptSrc: ["'self'"],
+      imgSrc: ["'self'", "data:", "https:"],
+    },
+  },
+  hsts: {
+    maxAge: 31536000,
+    includeSubDomains: true,
+    preload: true,
+  },
+}))
+
+// Enable gzip compression
+app.use(compression({
+  level: 6,
+  threshold: 1024, // Only compress responses > 1KB
+}))
 
 const allowedOrigins = ['http://localhost:3001', 'http://localhost:8081']
 logger.info('Configuring CORS', { allowedOrigins })
@@ -18,14 +62,26 @@ app.use(cors({
   origin: allowedOrigins,
   credentials: true,
 }))
-app.use(express.json())
-app.use(express.urlencoded({ extended: true }))
+app.use(express.json({ limit: '10mb' }))
+app.use(express.urlencoded({ extended: true, limit: '10mb' }))
 
+// Apply rate limiting to all API routes
+app.use(`/api/${config.API_VERSION}`, apiLimiter)
 app.use(`/api/${config.API_VERSION}`, routes)
 app.use(notFoundHandler)
+
+// Sentry error handler must be before other error handlers (only if Sentry is initialized)
+if (process.env.SENTRY_DSN) {
+  app.use(Sentry.Handlers.errorHandler())
+}
 app.use(errorHandler)
 
 const PORT = parseInt(config.PORT, 10)
+
+// Initialize Redis connection
+cacheService.connect().catch((error) => {
+  logger.warn('Failed to connect to Redis, continuing without cache', { error })
+})
 
 app.listen(PORT, () => {
   logger.info(`Server started on port ${PORT}`, {
@@ -41,5 +97,18 @@ process.on('unhandledRejection', (reason, promise) => {
 process.on('uncaughtException', (error) => {
   logger.error('Uncaught Exception', { error })
   process.exit(1)
+})
+
+// Graceful shutdown
+process.on('SIGTERM', async () => {
+  logger.info('SIGTERM received, shutting down gracefully')
+  await cacheService.disconnect()
+  process.exit(0)
+})
+
+process.on('SIGINT', async () => {
+  logger.info('SIGINT received, shutting down gracefully')
+  await cacheService.disconnect()
+  process.exit(0)
 })
 

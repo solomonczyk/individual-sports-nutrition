@@ -15,6 +15,10 @@ const loginSchema = z.object({
   password: z.string(),
 })
 
+const refreshTokenSchema = z.object({
+  refreshToken: z.string(),
+})
+
 export class AuthController {
   private authService: AuthService
 
@@ -73,6 +77,31 @@ export class AuthController {
       const apiError: ApiError = error as ApiError
       apiError.statusCode = apiError.statusCode || 401
       apiError.code = apiError.code || 'AUTH_ERROR'
+      next(apiError)
+    }
+  }
+
+  async refreshToken(req: Request, res: Response, next: NextFunction) {
+    try {
+      const validated = refreshTokenSchema.parse(req.body)
+      const result = await this.authService.refreshToken(validated.refreshToken)
+
+      res.json({
+        success: true,
+        data: result,
+      })
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        const apiError: ApiError = new Error('Validation error')
+        apiError.statusCode = 400
+        apiError.code = 'VALIDATION_ERROR'
+        apiError.message = error.errors.map((e) => e.message).join(', ')
+        return next(apiError)
+      }
+
+      const apiError: ApiError = error as ApiError
+      apiError.statusCode = apiError.statusCode || 401
+      apiError.code = apiError.code || 'REFRESH_ERROR'
       next(apiError)
     }
   }

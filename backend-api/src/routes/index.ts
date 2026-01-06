@@ -11,16 +11,12 @@ import progressRouter from './progress'
 import adviceRouter from './advice'
 import adminRouter from './admin'
 import serbianCuisineRouter from './serbian-cuisine'
+import healthRouter from './health'
 
 const router = Router()
 
-router.get('/health', (_req, res) => {
-  res.json({
-    status: 'ok',
-    timestamp: new Date().toISOString(),
-    service: 'individual-sports-nutrition-api',
-  })
-})
+// Health endpoints (no rate limiting for monitoring)
+router.use('/', healthRouter)
 
 router.use('/auth', authRouter)
 router.use('/health-profile', healthProfileRouter)

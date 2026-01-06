@@ -15,7 +15,13 @@ export interface AuthResponse {
     email: string
     preferred_language: string
   }
-  token: string
+  accessToken: string
+  refreshToken: string
+}
+
+export interface RefreshTokenResponse {
+  accessToken: string
+  refreshToken: string
 }
 
 export class AuthService {
@@ -33,14 +39,14 @@ export class AuthService {
       throw error
     }
 
-    const password_hash = await bcrypt.hash(input.password, 10)
+    const password_hash = await bcrypt.hash(input.password, 12) // Increased to 12 rounds
 
     const user = await this.userRepository.create({
       ...input,
       password_hash,
     })
 
-    const token = this.generateToken(user)
+    const { accessToken, refreshToken } = this.generateTokens(user)
 
     return {
       user: {
@@ -48,7 +54,8 @@ export class AuthService {
         email: user.email,
         preferred_language: user.preferred_language,
       },
-      token,
+      accessToken,
+      refreshToken,
     }
   }
 
@@ -67,7 +74,7 @@ export class AuthService {
       throw error
     }
 
-    const token = this.generateToken(user)
+    const { accessToken, refreshToken } = this.generateTokens(user)
 
     return {
       user: {
@@ -75,7 +82,8 @@ export class AuthService {
         email: user.email,
         preferred_language: user.preferred_language,
       },
-      token,
+      accessToken,
+      refreshToken,
     }
   }
 
@@ -89,11 +97,56 @@ export class AuthService {
     }
   }
 
-  private generateToken(user: User): string {
-    const payload = { userId: user.id, email: user.email }
-    return jwt.sign(payload, config.JWT_SECRET, {
-      expiresIn: config.JWT_EXPIRES_IN,
-    } as jwt.SignOptions)
+  async refreshToken(refreshToken: string): Promise<RefreshTokenResponse> {
+    try {
+      const decoded = jwt.verify(refreshToken, config.JWT_SECRET) as { 
+        userId: string
+        type: string 
+      }
+      
+      if (decoded.type !== 'refresh') {
+        throw new Error('Invalid token type')
+      }
+
+      const user = await this.userRepository.findById(decoded.userId)
+      if (!user) {
+        throw new Error('User not found')
+      }
+
+      const tokens = this.generateTokens(user)
+      return tokens
+    } catch (error) {
+      const authError: Error & { code?: string } = new Error('Invalid refresh token')
+      authError.code = 'INVALID_REFRESH_TOKEN'
+      throw authError
+    }
+  }
+
+  private generateTokens(user: User): { accessToken: string; refreshToken: string } {
+    const accessPayload = { 
+      userId: user.id, 
+      email: user.email,
+      type: 'access'
+    }
+    
+    const refreshPayload = { 
+      userId: user.id,
+      type: 'refresh'
+    }
+
+    const accessToken = jwt.sign(accessPayload, config.JWT_SECRET, {
+      expiresIn: '15m', // Short-lived access token
+      issuer: 'nutrition-api',
+      audience: 'nutrition-app',
+    })
+
+    const refreshToken = jwt.sign(refreshPayload, config.JWT_SECRET, {
+      expiresIn: '7d', // Long-lived refresh token
+      issuer: 'nutrition-api',
+      audience: 'nutrition-app',
+    })
+
+    return { accessToken, refreshToken }
   }
 }
 

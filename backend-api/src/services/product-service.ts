@@ -2,6 +2,7 @@ import { ProductRepository, BrandRepository } from '../repositories/product-repo
 import { Product, Brand, ProductWithTranslation } from '../models/product'
 import { ProductFilters } from '../repositories/product-repository'
 import { ContraindicationRepository } from '../repositories/contraindication-repository'
+import { cacheService, CacheService } from './cache-service'
 
 export interface ProductListResponse {
   products: ProductWithTranslation[]
@@ -22,12 +23,19 @@ export class ProductService {
   }
 
   async getById(id: string): Promise<ProductWithTranslation | null> {
-    const product = await this.productRepository.findById(id)
-    if (!product) {
-      return null
-    }
-
-    return await this.enrichProductWithTranslations(product)
+    const cacheKey = CacheService.generateKey('product', id)
+    
+    return await cacheService.cacheFunction(
+      cacheKey,
+      async () => {
+        const product = await this.productRepository.findById(id)
+        if (!product) {
+          return null
+        }
+        return await this.enrichProductWithTranslations(product)
+      },
+      1800 // 30 minutes
+    )
   }
 
   async getList(
@@ -58,11 +66,23 @@ export class ProductService {
   }
 
   async getBrands(): Promise<Brand[]> {
-    return await this.brandRepository.findAll()
+    const cacheKey = CacheService.generateKey('brands', 'all')
+    
+    return await cacheService.cacheFunction(
+      cacheKey,
+      async () => await this.brandRepository.findAll(),
+      3600 // 1 hour
+    )
   }
 
   async getVerifiedBrands(): Promise<Brand[]> {
-    return await this.brandRepository.findVerified()
+    const cacheKey = CacheService.generateKey('brands', 'verified')
+    
+    return await cacheService.cacheFunction(
+      cacheKey,
+      async () => await this.brandRepository.findVerified(),
+      3600 // 1 hour
+    )
   }
 
   async getBrandById(id: string): Promise<Brand | null> {
