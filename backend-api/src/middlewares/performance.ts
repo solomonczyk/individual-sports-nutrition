@@ -36,8 +36,10 @@ export function performanceMonitoring(req: PerformanceRequest, res: Response, ne
       })
     }
 
-    // Set response time header
-    res.setHeader('X-Response-Time', `${responseTime}ms`)
+    // Set response time header only if headers haven't been sent
+    if (!res.headersSent) {
+      res.setHeader('X-Response-Time', `${responseTime}ms`)
+    }
 
     // Call original end method
     return originalEnd(chunk, encoding, callback)
