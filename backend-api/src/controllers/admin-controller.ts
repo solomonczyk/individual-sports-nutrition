@@ -21,9 +21,9 @@ export class AdminController {
           active: 0
         },
         aggregation: {
-          pending: 0,
-          processed: 0,
-          failed: 0
+          lastRun: '',
+          status: 'unknown' as const,
+          productsUpdated: 0
         }
       }
 

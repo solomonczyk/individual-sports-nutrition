@@ -60,7 +60,7 @@ export interface Brand {
 
 // API functions
 export const dashboardApi = {
-  getStats: () => api.get<DashboardStats>('/admin/dashboard/stats'),
+  getStats: () => api.get<{ success: boolean; data: DashboardStats }>('/admin/dashboard/stats').then(res => res.data.data),
 };
 
 export const productsApi = {

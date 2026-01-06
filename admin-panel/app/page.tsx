@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { Users, Package, Store, Activity } from 'lucide-react';
+import { Users, Package, Store } from 'lucide-react';
 import { StatCard } from '@/components/StatCard';
 import { Badge } from '@/components/Badge';
 import { dashboardApi } from '@/lib/api';
@@ -10,7 +10,7 @@ import { formatRelativeTime } from '@/lib/utils';
 export default function DashboardPage() {
   const { data: stats, isLoading } = useQuery({
     queryKey: ['dashboard-stats'],
-    queryFn: () => dashboardApi.getStats().then(res => res.data),
+    queryFn: dashboardApi.getStats,
   });
 
   if (isLoading) {
@@ -20,6 +20,14 @@ export default function DashboardPage() {
       </div>
     );
   }
+
+  // Provide default values if stats is undefined
+  const safeStats = stats || {
+    users: { total: 0, active: 0, new: 0 },
+    products: { total: 0, pending: 0 },
+    stores: { total: 0, active: 0 },
+    aggregation: { lastRun: '', status: 'unknown' as const, productsUpdated: 0 }
+  };
 
   return (
     <div className="space-y-6">
@@ -33,23 +41,23 @@ export default function DashboardPage() {
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         <StatCard
           title="Total Users"
-          value={stats?.users.total || 0}
+          value={safeStats.users.total}
           icon={Users}
           trend={{ value: 12, isPositive: true }}
         />
         <StatCard
           title="Active Users"
-          value={stats?.users.active || 0}
+          value={safeStats.users.active}
           icon={Users}
         />
         <StatCard
           title="Total Products"
-          value={stats?.products.total || 0}
+          value={safeStats.products.total}
           icon={Package}
         />
         <StatCard
           title="Active Stores"
-          value={stats?.stores.active || 0}
+          value={safeStats.stores.active}
           icon={Store}
         />
       </div>
@@ -61,22 +69,22 @@ export default function DashboardPage() {
             <div className="flex items-center justify-between">
               <span className="text-sm text-gray-600">Status</span>
               <Badge variant={
-                stats?.aggregation.status === 'success' ? 'success' :
-                stats?.aggregation.status === 'error' ? 'error' : 'warning'
+                safeStats.aggregation.status === 'success' ? 'success' :
+                safeStats.aggregation.status === 'error' ? 'error' : 'warning'
               }>
-                {stats?.aggregation.status || 'unknown'}
+                {safeStats.aggregation.status}
               </Badge>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm text-gray-600">Last Run</span>
               <span className="text-sm font-medium text-gray-900">
-                {stats?.aggregation.lastRun ? formatRelativeTime(stats.aggregation.lastRun) : 'Never'}
+                {safeStats.aggregation.lastRun ? formatRelativeTime(safeStats.aggregation.lastRun) : 'Never'}
               </span>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm text-gray-600">Products Updated</span>
               <span className="text-sm font-medium text-gray-900">
-                {stats?.aggregation.productsUpdated || 0}
+                {safeStats.aggregation.productsUpdated}
               </span>
             </div>
           </div>
@@ -87,11 +95,11 @@ export default function DashboardPage() {
           <div className="mt-4 space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-sm text-gray-600">Pending Products</span>
-              <Badge variant="warning">{stats?.products.pending || 0}</Badge>
+              <Badge variant="warning">{safeStats.products.pending}</Badge>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm text-gray-600">New Users (7d)</span>
-              <Badge variant="info">{stats?.users.new || 0}</Badge>
+              <Badge variant="info">{safeStats.users.new}</Badge>
             </div>
           </div>
         </div>
