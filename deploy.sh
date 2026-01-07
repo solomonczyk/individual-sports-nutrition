@@ -144,6 +144,17 @@ wait_for_services() {
         sleep 2
     done
     
+    # Ожидание Web App
+    log_info "Ожидание Web App..."
+    for i in {1..60}; do
+        if curl -s http://localhost:3008/ &> /dev/null; then
+            log_success "Web App готов"
+            break
+        fi
+        echo -n "."
+        sleep 2
+    done
+    
     # Ожидание Nginx
     log_info "Ожидание Nginx..."
     for i in {1..30}; do
@@ -198,11 +209,13 @@ show_status() {
     
     echo ""
     echo "🌐 Доступные URL:"
-    echo "  • Admin Panel: http://localhost:8090/"
+    echo "  • Основное приложение: http://localhost:8090/"
+    echo "  • Admin Panel: http://localhost:8090/admin"
     echo "  • Backend API: http://localhost:8090/api/v1/"
     echo "  • Health Check: http://localhost:8090/health"
     echo "  • Direct Backend: http://localhost:3006/"
     echo "  • Direct Admin: http://localhost:3007/"
+    echo "  • Direct Web App: http://localhost:3008/"
     echo ""
     echo "📋 Управление:"
     echo "  • Просмотр логов: docker-compose -f docker-compose.production.yml logs -f"
