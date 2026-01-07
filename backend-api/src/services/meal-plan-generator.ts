@@ -3,7 +3,6 @@ import { NutritionPlanService } from './nutrition-plan-service'
 import { MealRepository } from '../repositories/meal-repository'
 import { DailyMealPlanRepository } from '../repositories/daily-meal-plan-repository'
 import { RecommendationService } from './recommendation-service'
-import { SerbianCuisineService } from './serbian-cuisine-service'
 import { MacroNutrients } from '../models/ingredient'
 import { GenerateMealPlanInput, DailyMealPlanFull } from '../models/meal'
 
@@ -13,7 +12,6 @@ export class MealPlanGenerator {
   private mealRepository: MealRepository
   private dailyMealPlanRepository: DailyMealPlanRepository
   private recommendationService: RecommendationService
-  private _serbianCuisineService: SerbianCuisineService
 
   constructor() {
     this.healthProfileService = new HealthProfileService()
@@ -21,7 +19,6 @@ export class MealPlanGenerator {
     this.mealRepository = new MealRepository()
     this.dailyMealPlanRepository = new DailyMealPlanRepository()
     this.recommendationService = new RecommendationService()
-    this._serbianCuisineService = new SerbianCuisineService()
   }
 
   /**
@@ -60,7 +57,7 @@ export class MealPlanGenerator {
       breakfast: serbianDistribution.breakfast,
       lunch: serbianDistribution.lunch,
       dinner: serbianDistribution.dinner,
-      snacks: [serbianDistribution.snack1, serbianDistribution.snack2],
+      snacks: [serbianDistribution.snacks, serbianDistribution.snacks],
     }
 
     // Приоритет сербской кухни при подборе блюд

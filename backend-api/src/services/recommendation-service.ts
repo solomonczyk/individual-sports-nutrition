@@ -1,7 +1,6 @@
 import { HealthProfileService } from './health-profile-service'
 import { ProductService } from './product-service'
 import { ContraindicationRepository } from '../repositories/contraindication-repository'
-import { AIServiceClient } from './ai-service-client'
 import { NutritionCalculator, CalculationResult } from './nutrition-calculator'
 import { Product, ProductWithTranslation } from '../models/product'
 import { HealthProfile } from '../models/health-profile'
