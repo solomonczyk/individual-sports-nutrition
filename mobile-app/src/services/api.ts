@@ -1,11 +1,9 @@
 import axios from 'axios'
-import Constants from 'expo-constants'
-
-const API_URL = Constants.expoConfig?.extra?.apiUrl || 'http://localhost:3000/api/v1'
+import { API_CONFIG } from '../config/api'
 
 export const apiClient = axios.create({
-  baseURL: API_URL,
-  timeout: 10000,
+  baseURL: API_CONFIG.baseURL,
+  timeout: API_CONFIG.timeout,
   headers: {
     'Content-Type': 'application/json',
   },
