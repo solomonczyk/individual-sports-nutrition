@@ -18,6 +18,9 @@ initSentry()
 
 const app = express()
 
+// Trust proxy for rate limiting behind nginx
+app.set('trust proxy', 1)
+
 // Sentry request handler must be the first middleware (only if Sentry is initialized)
 if (process.env.SENTRY_DSN) {
   // In newer Sentry versions, use setupExpressErrorHandler for both request and error handling
