@@ -51,7 +51,11 @@ services:
     environment:
       NODE_ENV: production
       PORT: 3003
-      DATABASE_URL: postgresql://app_user:${DB_PASSWORD}@postgres:5432/individual_sports_nutrition
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: individual_sports_nutrition
+      DB_USER: app_user
+      DB_PASSWORD: ${DB_PASSWORD}
       REDIS_HOST: redis
       REDIS_PORT: 6379
       JWT_SECRET: ${JWT_SECRET}
