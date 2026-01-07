@@ -7,6 +7,17 @@ export function httpsRedirect(req: Request, res: Response, next: NextFunction) {
     return next()
   }
 
+  // Skip HTTPS redirect for health check endpoints and localhost
+  if (req.path === '/health' || req.path === '/ready' || req.path === '/live') {
+    return next()
+  }
+
+  // Skip for internal Docker network requests
+  const host = req.headers.host || ''
+  if (host.includes('localhost') || host.includes('127.0.0.1') || host.includes('backend-api')) {
+    return next()
+  }
+
   // Check if request is already HTTPS
   if (req.secure || req.headers['x-forwarded-proto'] === 'https') {
     return next()
