@@ -10,14 +10,17 @@ WORKDIR /app
 # Копирование package.json и package-lock.json
 COPY package*.json ./
 
-# Установка зависимостей
-RUN npm ci --only=production
+# Установка всех зависимостей (включая dev для сборки)
+RUN npm ci
 
 # Копирование исходного кода
 COPY . .
 
 # Сборка TypeScript
 RUN npm run build
+
+# Удаление dev зависимостей после сборки
+RUN npm prune --production
 
 # Создание пользователя для безопасности
 RUN addgroup -g 1001 -S nodejs
