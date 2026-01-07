@@ -125,7 +125,7 @@ wait_for_services() {
     # Ожидание Backend API
     log_info "Ожидание Backend API..."
     for i in {1..60}; do
-        if curl -s http://localhost:3004/health &> /dev/null; then
+        if curl -s http://localhost:3006/health &> /dev/null; then
             log_success "Backend API готов"
             break
         fi
@@ -136,7 +136,7 @@ wait_for_services() {
     # Ожидание Admin Panel
     log_info "Ожидание Admin Panel..."
     for i in {1..60}; do
-        if curl -s http://localhost:3005/ &> /dev/null; then
+        if curl -s http://localhost:3007/ &> /dev/null; then
             log_success "Admin Panel готов"
             break
         fi
@@ -201,8 +201,8 @@ show_status() {
     echo "  • Admin Panel: http://localhost:8090/"
     echo "  • Backend API: http://localhost:8090/api/v1/"
     echo "  • Health Check: http://localhost:8090/health"
-    echo "  • Direct Backend: http://localhost:3004/"
-    echo "  • Direct Admin: http://localhost:3005/"
+    echo "  • Direct Backend: http://localhost:3006/"
+    echo "  • Direct Admin: http://localhost:3007/"
     echo ""
     echo "📋 Управление:"
     echo "  • Просмотр логов: docker-compose -f docker-compose.production.yml logs -f"

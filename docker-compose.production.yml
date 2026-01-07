@@ -14,7 +14,7 @@ services:
       - postgres_data:/var/lib/postgresql/data
       - ./database/migrations:/docker-entrypoint-initdb.d
     ports:
-      - "5434:5432"
+      - "5436:5432"
     networks:
       - isn_network
     healthcheck:
@@ -32,7 +32,7 @@ services:
     volumes:
       - redis_data:/data
     ports:
-      - "6381:6379"
+      - "6382:6379"
     networks:
       - isn_network
     healthcheck:
@@ -59,7 +59,7 @@ services:
       SENTRY_DSN: ${SENTRY_DSN}
       LOG_LEVEL: info
     ports:
-      - "3004:3003"
+      - "3006:3003"
     depends_on:
       postgres:
         condition: service_healthy
@@ -88,7 +88,7 @@ services:
       PORT: 3001
       NEXT_PUBLIC_API_URL: http://backend-api:3003/api/v1
     ports:
-      - "3005:3001"
+      - "3007:3001"
     depends_on:
       backend-api:
         condition: service_healthy
