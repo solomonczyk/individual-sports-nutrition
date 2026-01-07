@@ -27,14 +27,14 @@ export class RecommendationService {
   private healthProfileService: HealthProfileService
   private productService: ProductService
   private contraindicationRepository: ContraindicationRepository
-  private aiServiceClient: AIServiceClient
+  private _aiServiceClient: AIServiceClient
   private nutritionCalculator: NutritionCalculator
 
   constructor() {
     this.healthProfileService = new HealthProfileService()
     this.productService = new ProductService()
     this.contraindicationRepository = new ContraindicationRepository()
-    this.aiServiceClient = new AIServiceClient()
+    this._aiServiceClient = new AIServiceClient()
     this.nutritionCalculator = new NutritionCalculator()
   }
 

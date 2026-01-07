@@ -11,7 +11,7 @@ import {
   PartnerProductData, 
   ProductMatch, 
   AggregationResult,
-  AggregationJob 
+  AggregationJob as _AggregationJob 
 } from './types';
 import { logger } from '../../utils/logger';
 

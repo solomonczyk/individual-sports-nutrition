@@ -20,9 +20,7 @@ const app = express()
 
 // Sentry request handler must be the first middleware (only if Sentry is initialized)
 if (process.env.SENTRY_DSN) {
-  app.use(Sentry.Handlers.requestHandler())
-  // TracingHandler creates a trace for every incoming request
-  app.use(Sentry.Handlers.tracingHandler())
+  app.use(Sentry.setupExpressErrorHandler(app))
 }
 
 // HTTPS redirect and security headers
@@ -71,9 +69,7 @@ app.use(`/api/${config.API_VERSION}`, routes)
 app.use(notFoundHandler)
 
 // Sentry error handler must be before other error handlers (only if Sentry is initialized)
-if (process.env.SENTRY_DSN) {
-  app.use(Sentry.Handlers.errorHandler())
-}
+// Note: In newer Sentry versions, error handling is set up with setupExpressErrorHandler above
 app.use(errorHandler)
 
 const PORT = parseInt(config.PORT, 10)

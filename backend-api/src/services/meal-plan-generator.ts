@@ -49,12 +49,12 @@ export class MealPlanGenerator {
 
     // Распределяем калории и БЖУ по приемам пищи
     // Используем сербское распределение (главный прием пищи в обед)
-    const serbianDistribution = this.serbianCuisineService.adjustMealDistributionForSerbian(
-      nutritionPlan.calories || 0,
-      nutritionPlan.protein || 0,
-      nutritionPlan.carbs || 0,
-      nutritionPlan.fats || 0
-    )
+    const serbianDistribution = {
+      breakfast: { calories: (nutritionPlan.calories || 0) * 0.25, protein: (nutritionPlan.protein || 0) * 0.25, carbs: (nutritionPlan.carbs || 0) * 0.25, fats: (nutritionPlan.fats || 0) * 0.25 },
+      lunch: { calories: (nutritionPlan.calories || 0) * 0.40, protein: (nutritionPlan.protein || 0) * 0.40, carbs: (nutritionPlan.carbs || 0) * 0.40, fats: (nutritionPlan.fats || 0) * 0.40 },
+      dinner: { calories: (nutritionPlan.calories || 0) * 0.30, protein: (nutritionPlan.protein || 0) * 0.30, carbs: (nutritionPlan.carbs || 0) * 0.30, fats: (nutritionPlan.fats || 0) * 0.30 },
+      snacks: { calories: (nutritionPlan.calories || 0) * 0.05, protein: (nutritionPlan.protein || 0) * 0.05, carbs: (nutritionPlan.carbs || 0) * 0.05, fats: (nutritionPlan.fats || 0) * 0.05 }
+    }
 
     const distribution = {
       breakfast: serbianDistribution.breakfast,
@@ -110,7 +110,13 @@ export class MealPlanGenerator {
 
     // Подбираем блюда для каждого приема пищи
     // Используем стандартное сербское расписание, если не указано иное
-    const defaultSerbianTimes = this.serbianCuisineService.getDefaultMealTimes()
+    const defaultSerbianTimes = {
+      breakfast: '08:00',
+      lunch: '14:00',
+      dinner: '20:00',
+      snack1: '10:30',
+      snack2: '16:30'
+    }
     const mealTimes = input.preferences?.meal_times || {
       breakfast: defaultSerbianTimes.breakfast,
       lunch: defaultSerbianTimes.lunch,

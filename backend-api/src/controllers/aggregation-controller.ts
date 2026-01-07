@@ -53,7 +53,7 @@ export async function getAggregationStatus(req: Request, res: Response, next: Ne
  */
 export async function getPendingProducts(req: Request, res: Response, next: NextFunction) {
   try {
-    const { storeId, status = 'pending', limit = 50, offset = 0 } = req.query;
+    const { storeId: _storeId, status: _status = 'pending', limit = 50, offset = 0 } = req.query;
     
     // TODO: Implement with repository
     res.json({
@@ -72,8 +72,8 @@ export async function getPendingProducts(req: Request, res: Response, next: Next
  */
 export async function reviewPendingProduct(req: Request, res: Response, next: NextFunction) {
   try {
-    const { id } = req.params;
-    const { action, matchedProductId } = req.body; // action: 'approve' | 'reject'
+    const { id: _id } = req.params;
+    const { action, matchedProductId: _matchedProductId } = req.body; // action: 'approve' | 'reject'
     
     // TODO: Implement review logic
     res.json({

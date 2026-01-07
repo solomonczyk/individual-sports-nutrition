@@ -45,7 +45,7 @@ export interface NutritionRecommendation {
 
 export class SerbianCuisineService {
   // Get all Serbian dishes
-  async getAllDishes(language: string = 'sr'): Promise<SerbianDish[]> {
+  async getAllDishes(_language: string = 'sr'): Promise<SerbianDish[]> {
     const result = await pool.query(`
       SELECT 
         d.*,
@@ -184,8 +184,8 @@ export class SerbianCuisineService {
     userId: string,
     targetCalories: number,
     targetProtein: number,
-    targetCarbs: number,
-    targetFat: number
+    _targetCarbs: number,
+    _targetFat: number
   ): Promise<NutritionRecommendation[]> {
     const preferences = await this.getUserPreferences(userId);
     const dishes = await this.getAllDishes();
@@ -205,8 +205,8 @@ export class SerbianCuisineService {
       const servingSize = dish.typical_serving_size || 200;
       const servingCalories = (dish.calories_per_100g * servingSize) / 100;
       const servingProtein = (dish.protein_per_100g * servingSize) / 100;
-      const servingCarbs = (dish.carbs_per_100g * servingSize) / 100;
-      const servingFat = (dish.fat_per_100g * servingSize) / 100;
+      const _servingCarbs = (dish.carbs_per_100g * servingSize) / 100;
+      const _servingFat = (dish.fat_per_100g * servingSize) / 100;
 
       // Check if fits macros (within 20% tolerance)
       const caloriesFit = servingCalories <= targetCalories * 0.4; // Max 40% of daily calories per meal
