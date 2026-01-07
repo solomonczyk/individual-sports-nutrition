@@ -125,7 +125,7 @@ wait_for_services() {
     # Ожидание Backend API
     log_info "Ожидание Backend API..."
     for i in {1..60}; do
-        if curl -s http://localhost:3003/health &> /dev/null; then
+        if curl -s http://localhost:3004/health &> /dev/null; then
             log_success "Backend API готов"
             break
         fi
@@ -136,7 +136,7 @@ wait_for_services() {
     # Ожидание Admin Panel
     log_info "Ожидание Admin Panel..."
     for i in {1..60}; do
-        if curl -s http://localhost:3001/ &> /dev/null; then
+        if curl -s http://localhost:3005/ &> /dev/null; then
             log_success "Admin Panel готов"
             break
         fi
@@ -147,7 +147,7 @@ wait_for_services() {
     # Ожидание Nginx
     log_info "Ожидание Nginx..."
     for i in {1..30}; do
-        if curl -s http://localhost/health &> /dev/null; then
+        if curl -s http://localhost:8090/health &> /dev/null; then
             log_success "Nginx готов"
             break
         fi
@@ -161,7 +161,7 @@ health_check() {
     log_info "Проверка здоровья сервисов..."
     
     # Проверка Backend API
-    if curl -s http://localhost/api/v1/health | grep -q "ok"; then
+    if curl -s http://localhost:8090/api/v1/health | grep -q "ok"; then
         log_success "✅ Backend API здоров"
     else
         log_error "❌ Backend API не отвечает"
@@ -169,7 +169,7 @@ health_check() {
     fi
     
     # Проверка Admin Panel
-    if curl -s -o /dev/null -w "%{http_code}" http://localhost/ | grep -q "200"; then
+    if curl -s -o /dev/null -w "%{http_code}" http://localhost:8090/ | grep -q "200"; then
         log_success "✅ Admin Panel доступен"
     else
         log_error "❌ Admin Panel недоступен"
@@ -177,7 +177,7 @@ health_check() {
     fi
     
     # Проверка базы данных через API
-    if curl -s http://localhost/api/v1/ready | grep -q "ready"; then
+    if curl -s http://localhost:8090/api/v1/ready | grep -q "ready"; then
         log_success "✅ База данных подключена"
     else
         log_error "❌ Проблемы с базой данных"
@@ -198,9 +198,11 @@ show_status() {
     
     echo ""
     echo "🌐 Доступные URL:"
-    echo "  • Admin Panel: http://localhost/"
-    echo "  • Backend API: http://localhost/api/v1/"
-    echo "  • Health Check: http://localhost/health"
+    echo "  • Admin Panel: http://localhost:8090/"
+    echo "  • Backend API: http://localhost:8090/api/v1/"
+    echo "  • Health Check: http://localhost:8090/health"
+    echo "  • Direct Backend: http://localhost:3004/"
+    echo "  • Direct Admin: http://localhost:3005/"
     echo ""
     echo "📋 Управление:"
     echo "  • Просмотр логов: docker-compose -f docker-compose.production.yml logs -f"
