@@ -1,11 +1,19 @@
 import { Request, Response } from 'express';
 import { SerbianCuisineService } from '../services/serbian-cuisine-service';
 
+// Extend Request interface to include user
+interface AuthenticatedRequest extends Request {
+  user?: {
+    id: string;
+    email: string;
+  };
+}
+
 const cuisineService = new SerbianCuisineService();
 
 export class SerbianCuisineController {
   // Get all dishes
-  async getAllDishes(req: Request, res: Response) {
+  async getAllDishes(req: Request, res: Response): Promise<void> {
     try {
       const { language = 'sr' } = req.query;
       const dishes = await cuisineService.getAllDishes(language as string);
@@ -17,7 +25,7 @@ export class SerbianCuisineController {
   }
 
   // Get popular dishes
-  async getPopularDishes(req: Request, res: Response) {
+  async getPopularDishes(req: Request, res: Response): Promise<void> {
     try {
       const { limit = 10 } = req.query;
       const dishes = await cuisineService.getPopularDishes(Number(limit));
@@ -29,13 +37,14 @@ export class SerbianCuisineController {
   }
 
   // Get dish by ID
-  async getDishById(req: Request, res: Response) {
+  async getDishById(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
       const dish = await cuisineService.getDishById(id);
 
       if (!dish) {
-        return res.status(404).json({ error: 'Dish not found' });
+        res.status(404).json({ error: 'Dish not found' });
+        return;
       }
 
       res.json(dish);
@@ -46,12 +55,13 @@ export class SerbianCuisineController {
   }
 
   // Get user food preferences
-  async getUserPreferences(req: Request, res: Response) {
+  async getUserPreferences(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const userId = req.user?.id; // Assuming auth middleware sets req.user
 
       if (!userId) {
-        return res.status(401).json({ error: 'Unauthorized' });
+        res.status(401).json({ error: 'Unauthorized' });
+        return;
       }
 
       const preferences = await cuisineService.getUserPreferences(userId);
@@ -68,12 +78,13 @@ export class SerbianCuisineController {
   }
 
   // Update user food preferences
-  async updateUserPreferences(req: Request, res: Response) {
+  async updateUserPreferences(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const userId = req.user?.id;
 
       if (!userId) {
-        return res.status(401).json({ error: 'Unauthorized' });
+        res.status(401).json({ error: 'Unauthorized' });
+        return;
       }
 
       const preferences = await cuisineService.updateUserPreferences(userId, req.body);
@@ -85,12 +96,13 @@ export class SerbianCuisineController {
   }
 
   // Get dish recommendations for user
-  async getRecommendations(req: Request, res: Response) {
+  async getRecommendations(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const userId = req.user?.id;
 
       if (!userId) {
-        return res.status(401).json({ error: 'Unauthorized' });
+        res.status(401).json({ error: 'Unauthorized' });
+        return;
       }
 
       const {
@@ -116,7 +128,7 @@ export class SerbianCuisineController {
   }
 
   // Get local brands
-  async getLocalBrands(req: Request, res: Response) {
+  async getLocalBrands(_req: Request, res: Response): Promise<void> {
     try {
       const brands = await cuisineService.getLocalBrands();
       res.json(brands);
@@ -127,7 +139,7 @@ export class SerbianCuisineController {
   }
 
   // Mark brand as local (admin only)
-  async markBrandAsLocal(req: Request, res: Response) {
+  async markBrandAsLocal(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
       const { isLocal = true } = req.body;

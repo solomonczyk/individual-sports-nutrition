@@ -97,16 +97,17 @@ export class AdminController {
   }
 
   // Get product by ID
-  async getProductById(req: Request, res: Response) {
+  async getProductById(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params
       const result = await pool.query('SELECT * FROM products WHERE id = $1', [id])
       
       if (result.rows.length === 0) {
-        return res.status(404).json({
+        res.status(404).json({
           success: false,
           error: 'Product not found'
         })
+        return
       }
 
       res.json({
@@ -123,7 +124,7 @@ export class AdminController {
   }
 
   // Update product
-  async updateProduct(req: Request, res: Response) {
+  async updateProduct(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params
       const { name, status } = req.body
@@ -134,10 +135,11 @@ export class AdminController {
       )
 
       if (result.rows.length === 0) {
-        return res.status(404).json({
+        res.status(404).json({
           success: false,
           error: 'Product not found'
         })
+        return
       }
 
       res.json({
@@ -182,7 +184,7 @@ export class AdminController {
   }
 
   // Update store
-  async updateStore(req: Request, res: Response) {
+  async updateStore(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params
       const { name, url, status } = req.body
@@ -193,10 +195,11 @@ export class AdminController {
       )
 
       if (result.rows.length === 0) {
-        return res.status(404).json({
+        res.status(404).json({
           success: false,
           error: 'Store not found'
         })
+        return
       }
 
       res.json({
@@ -241,7 +244,7 @@ export class AdminController {
   }
 
   // Update brand
-  async updateBrand(req: Request, res: Response) {
+  async updateBrand(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params
       const { name, is_local, is_verified } = req.body
@@ -252,10 +255,11 @@ export class AdminController {
       )
 
       if (result.rows.length === 0) {
-        return res.status(404).json({
+        res.status(404).json({
           success: false,
           error: 'Brand not found'
         })
+        return
       }
 
       res.json({
