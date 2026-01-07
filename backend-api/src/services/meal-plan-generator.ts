@@ -13,7 +13,7 @@ export class MealPlanGenerator {
   private mealRepository: MealRepository
   private dailyMealPlanRepository: DailyMealPlanRepository
   private recommendationService: RecommendationService
-  private serbianCuisineService: SerbianCuisineService
+  private _serbianCuisineService: SerbianCuisineService
 
   constructor() {
     this.healthProfileService = new HealthProfileService()
@@ -21,7 +21,7 @@ export class MealPlanGenerator {
     this.mealRepository = new MealRepository()
     this.dailyMealPlanRepository = new DailyMealPlanRepository()
     this.recommendationService = new RecommendationService()
-    this.serbianCuisineService = new SerbianCuisineService()
+    this._serbianCuisineService = new SerbianCuisineService()
   }
 
   /**

@@ -205,8 +205,6 @@ export class SerbianCuisineService {
       const servingSize = dish.typical_serving_size || 200;
       const servingCalories = (dish.calories_per_100g * servingSize) / 100;
       const servingProtein = (dish.protein_per_100g * servingSize) / 100;
-      const _servingCarbs = (dish.carbs_per_100g * servingSize) / 100;
-      const _servingFat = (dish.fat_per_100g * servingSize) / 100;
 
       // Check if fits macros (within 20% tolerance)
       const caloriesFit = servingCalories <= targetCalories * 0.4; // Max 40% of daily calories per meal

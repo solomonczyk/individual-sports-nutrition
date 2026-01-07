@@ -20,7 +20,8 @@ const app = express()
 
 // Sentry request handler must be the first middleware (only if Sentry is initialized)
 if (process.env.SENTRY_DSN) {
-  app.use(Sentry.setupExpressErrorHandler(app))
+  // In newer Sentry versions, use setupExpressErrorHandler for both request and error handling
+  Sentry.setupExpressErrorHandler(app)
 }
 
 // HTTPS redirect and security headers

@@ -10,13 +10,13 @@ import {
   getPendingProducts,
   reviewPendingProduct 
 } from '../controllers/aggregation-controller';
-import { authenticate as authMiddleware } from '../middlewares/auth';
+import { authMiddleware as authenticate } from '../middlewares/auth';
 
 const router = Router();
 
 // Все роуты требуют аутентификации
 // TODO: Добавить проверку роли admin
-router.use(authMiddleware);
+router.use(authenticate);
 
 // Запустить агрегацию для магазина
 router.post('/:storeId/run', runAggregation);
