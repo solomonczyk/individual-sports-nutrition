@@ -1,5 +1,5 @@
-import { Request, Response } from 'express';
-import { pool } from '../config/database';
+import { Request, Response } from 'express'
+import { pool } from '../config/database'
 
 export class AdminController {
   // Dashboard stats

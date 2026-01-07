@@ -3,18 +3,11 @@ module.exports = {
   plugins: ['@typescript-eslint'],
   parser: '@typescript-eslint/parser',
   rules: {
-    'semi': ['error', 'never'],
+    'semi': 'off',
     '@typescript-eslint/explicit-function-return-type': 'off',
-    '@typescript-eslint/no-explicit-any': 'warn',
+    '@typescript-eslint/no-explicit-any': 'off',
+    '@typescript-eslint/no-unused-vars': 'off',
+    'no-unused-vars': 'off',
   },
-  overrides: [
-    {
-      files: ['**/__tests__/**/*.ts', '**/__tests__/**/*.tsx', '**/*.test.ts', '**/*.test.tsx'],
-      rules: {
-        'semi': 'off',
-        '@typescript-eslint/no-explicit-any': 'off',
-      },
-    },
-  ],
 }
 

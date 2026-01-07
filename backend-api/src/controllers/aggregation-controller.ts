@@ -3,9 +3,9 @@
  * API endpoints для управления агрегацией данных
  */
 
-import { Request, Response, NextFunction } from 'express';
-import { AggregationService } from '../services/aggregation';
-import { logger } from '../utils/logger';
+import { Request, Response, NextFunction } from 'express'
+import { AggregationService } from '../services/aggregation'
+import { logger } from '../utils/logger'
 
 const aggregationService = new AggregationService();
 
