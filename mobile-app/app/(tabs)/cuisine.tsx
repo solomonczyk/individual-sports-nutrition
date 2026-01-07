@@ -10,7 +10,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { useQuery } from '@tanstack/react-query';
 import { DishCard } from '@/src/components/cuisine/DishCard';
-import { useLanguageStore } from '@/src/store/language';
+import { useLanguageStore } from '@/src/store/language-store';
 
 interface SerbianDish {
   id: string;
